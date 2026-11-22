@@ -1,0 +1,77 @@
+name: Build UCTSalary Android APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'UCTSalary_Android.zip'
+      - '.github/workflows/android-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Inspect and extract Android project
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f UCTSalary_Android.zip
+          mkdir -p extracted
+          unzip -q UCTSalary_Android.zip -d extracted
+          echo "Archive contents:"
+          find extracted -maxdepth 4 -type f | sort | head -300
+          WRAPPER="$(find extracted -type f -name gradlew -print -quit)"
+          if [ -z "$WRAPPER" ]; then
+            echo "::error::No Gradle wrapper (gradlew) found in UCTSalary_Android.zip"
+            exit 1
+          fi
+          PROJECT_DIR="$(dirname "$WRAPPER")"
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+          chmod +x "$WRAPPER"
+          echo "Gradle project root: $PROJECT_DIR"
+          echo "Gradle settings/build files:"
+          find "$PROJECT_DIR" -maxdepth 2 \( -name 'settings.gradle' -o -name 'settings.gradle.kts' -o -name 'build.gradle' -o -name 'build.gradle.kts' \) -print
+
+      - name: Build debug APK
+        working-directory: ${{ env.PROJECT_DIR }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./gradlew --no-daemon --stacktrace assembleDebug
+
+      - name: Collect APKs
+        id: collect
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p apk-output
+          find "$PROJECT_DIR" -type f -path '*/build/outputs/apk/*/*.apk' -exec cp {} apk-output/ \;
+          if [ -z "$(find apk-output -maxdepth 1 -name '*.apk' -print -quit)" ]; then
+            echo "::error::Gradle completed but no APK was found"
+            exit 1
+          fi
+          ls -lh apk-output
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: UCTSalary-Android-debug-APK
+          path: apk-output/*.apk
+          if-no-files-found: error
+          retention-days: 14
