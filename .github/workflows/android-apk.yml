@@ -6,6 +6,7 @@ on:
     paths:
       - 'UCTSalary_Android.zip'
       - '.github/workflows/android-apk.yml'
+      - 'README.md'
   workflow_dispatch:
 
 permissions:
