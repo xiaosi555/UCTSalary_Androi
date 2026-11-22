@@ -12,3 +12,5 @@ GitHub Actions automatically builds a debug APK when the source archive or build
 - Artifact retention: 14 days
 
 Download the APK from the completed workflow run's **Artifacts** section.
+
+Build workflow uses explicit Android SDK packages to avoid obsolete SDK tools.
