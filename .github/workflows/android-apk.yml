@@ -57,7 +57,7 @@ jobs:
             exit 1
           fi
           DIST_URL="$(grep '^distributionUrl=' "$WRAPPER_PROPS" | cut -d= -f2- | sed 's/\\\\:/:/g')"
-          GRADLE_VERSION="$(printf '%s' "$DIST_URL" | grep -oE 'gradle-[0-9]+(\\.[0-9]+)*' | head -1 | sed 's/^gradle-//')"
+          GRADLE_VERSION="$(printf '%s' "$DIST_URL" | grep -oE 'gradle-[0-9]+(\\.[0-9]+)+' | head -1 | sed 's/^gradle-//')"
           if [ -z "$GRADLE_VERSION" ]; then
             echo "::error::Could not determine Gradle version from $WRAPPER_PROPS"
             cat "$WRAPPER_PROPS"
