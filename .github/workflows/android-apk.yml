@@ -79,6 +79,8 @@ jobs:
             sed -i "/^package /a import androidx.compose.foundation.layout.matchParentSize" "$HOME_SCREEN"
             echo "Applied missing Compose matchParentSize import to HomeScreen.kt"
           fi
+          echo "---- HomeScreen.kt first 50 lines after patch ----"
+          nl -ba "$HOME_SCREEN" | sed -n "1,50p"
 
       - name: Set up project Gradle version
         uses: gradle/actions/setup-gradle@v4
