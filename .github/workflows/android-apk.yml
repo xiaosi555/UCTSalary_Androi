@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -116,6 +116,26 @@ jobs:
           fi
           cp "$APK_PATH" apk-output/
           ls -lh apk-output
+      - name: Commit patched Android source archive to main
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$GITHUB_WORKSPACE/extracted"
+          rm -f "$GITHUB_WORKSPACE/UCTSalary_Android.zip"
+          zip -qr "$GITHUB_WORKSPACE/UCTSalary_Android.zip" UCTSalary
+          cd "$GITHUB_WORKSPACE"
+          if ! git diff --quiet -- UCTSalary_Android.zip; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add UCTSalary_Android.zip
+            git commit -m "Fix Compose import in Android source archive [skip ci]"
+            git push origin HEAD:main
+            echo "Patched Android source archive committed to main"
+          else
+            echo "Android source archive already contains the fix"
+          fi
+
       - name: Upload debug APK artifact
         uses: actions/upload-artifact@v4
         with:
