@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UCT salary（工资APP）需求说明书 v1.0</title>
+<style>
+:root{--pri:#16a34a;--pri-soft:#e8f7ee;--ink:#1f2937;--sub:#6b7280;--line:#e5e7eb;--bg:#f6f7f9;--warn:#b45309;--warn-bg:#fff7e6;--code:#0f172a}
+@media (prefers-color-scheme:dark){:root{--ink:#e5e7eb;--sub:#9ca3af;--line:#2a3340;--bg:#0f1419;--pri-soft:#12301f;--warn-bg:#2b2112;--warn:#fbbf24;--code:#e5e7eb}body{background:var(--bg)}.card,table,.toc{background:#161c24!important}th{background:#1c2430!important}pre{background:#0b0f14!important}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font:15px/1.75 -apple-system,"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;color:var(--ink);background:var(--bg)}
+.wrap{display:flex;max-width:1280px;margin:0 auto}
+.toc{position:sticky;top:0;align-self:flex-start;height:100vh;overflow:auto;width:260px;flex:none;padding:24px 16px;border-right:1px solid var(--line);background:#fff;font-size:13px}
+.toc b{display:block;margin:0 0 10px;font-size:15px}
+.toc a{display:block;color:var(--sub);text-decoration:none;padding:3px 8px;border-radius:6px}
+.toc a:hover{background:var(--pri-soft);color:var(--pri)}
+.toc a.h3{padding-left:20px;font-size:12px}
+main{flex:1;min-width:0;padding:32px 40px 80px}
+header.cover{background:linear-gradient(135deg,#16a34a,#0d9488);color:#fff;border-radius:16px;padding:36px 32px;margin-bottom:28px}
+header.cover h1{margin:0 0 6px;font-size:30px}
+header.cover p{margin:2px 0;opacity:.92}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.meta span{background:rgba(255,255,255,.18);border-radius:999px;padding:3px 12px;font-size:12px}
+h2{font-size:22px;margin:44px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--pri)}
+h3{font-size:17px;margin:28px 0 8px}
+h4{font-size:15px;margin:18px 0 6px;color:var(--pri)}
+p{margin:8px 0}
+ul,ol{margin:6px 0 10px;padding-left:22px}
+li{margin:2px 0}
+table{border-collapse:collapse;width:100%;margin:10px 0 16px;background:#fff;font-size:13.5px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;white-space:normal}
+th{background:#f1f5f2;font-weight:600;white-space:nowrap}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+code{background:rgba(22,163,74,.1);padding:1px 6px;border-radius:4px;font:12.5px ui-monospace,Menlo,Consolas,monospace;color:var(--code)}
+pre{background:#0f172a;color:#e2e8f0;padding:14px 16px;border-radius:10px;overflow:auto;font:12.5px/1.6 ui-monospace,Menlo,Consolas,monospace}
+pre code{background:none;color:inherit;padding:0}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:12px 0}
+.note{background:var(--warn-bg);border-left:4px solid var(--warn);padding:10px 14px;border-radius:6px;margin:12px 0;font-size:14px}
+.ok{background:var(--pri-soft);border-left:4px solid var(--pri);padding:10px 14px;border-radius:6px;margin:12px 0;font-size:14px}
+.tag{display:inline-block;font-size:11px;padding:0 7px;border-radius:999px;background:var(--pri-soft);color:var(--pri);margin-right:4px;font-weight:600}
+.tag.p0{background:#fee2e2;color:#b91c1c}.tag.p1{background:#fef3c7;color:#b45309}.tag.p2{background:#e0f2fe;color:#0369a1}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tree{font:13px/1.7 ui-monospace,Menlo,Consolas,monospace;white-space:pre}
+@media (max-width:900px){.toc{display:none}main{padding:20px 16px 60px}.grid2{grid-template-columns:1fr}}
+@media print{.toc{display:none}body{background:#fff}main{padding:0}h2{break-after:avoid}table,pre{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc" id="toc"><b>目录</b></nav>
+<main>
+
+<header class="cover">
+  <h1>UCT salary（工资APP）需求说明书</h1>
+  <p>工时记录 · 工资核算 · 多用户 · 按周期配置　——　Web 版功能基线 与 Android 原生实现规格</p>
+  <div class="meta"><span>文档版本 v1.0</span><span>基线：工资APP_日历颜色修正版.html</span><span>目标平台：Android 8.0+（API 26）</span><span>技术栈：Kotlin · Jetpack Compose</span></div>
+</header>
+
+<h2 id="s1">1. 文档说明</h2>
+<h3>1.1 目的与范围</h3>
+<p>本文档完整描述“UCT salary”工时/工资记录应用的业务需求，作为 Android 原生版本（工程 <code>UCTSalary</code>）的开发、测试与验收依据。需求来源于现有 Web 单文件版本（以下称“基线版”），文档中的所有规则、公式、默认值均已与基线版实际运行结果逐项核对（见第 11 章验收用例，数值由基线版实测生成）。</p>
+<h3>1.2 术语</h3>
+<table>
+<tr><th>术语</th><th>含义</th></tr>
+<tr><td>工资周期（周期）</td><td>上月 16 日 ～ 本月 15 日。例如 09.16–10.15。</td></tr>
+<tr><td>周期键（cycleKey）</td><td>6 位字符串 <code>YYYYMM</code>，取周期<b>结束月</b>。09.16–10.15 的周期键为 <code>202610</code>。日期 d 的周期键：日 ≥ 16 则为次月，否则为当月。</td></tr>
+<tr><td>设置版本（SettingsVersion）</td><td>某周期起生效的一份完整设置快照（工资、扣除、五险比例、补贴、考勤周期）。键 <code>from</code> 为生效周期键，最早版本为 <code>000000</code>。</td></tr>
+<tr><td>时薪（hs）</td><td>月基本工资 ÷ 21.75 ÷ 8，全程保留双精度，不提前四舍五入。</td></tr>
+<tr><td>班次类型</td><td>白班、夜班、中班、休息、平时加班、周末加班、调休加班、节假日加班（记录中另有早班、晚班，用于统计与导入）。</td></tr>
+<tr><td>分段加班</td><td>一条记录的加班工时拆成最多两段，每段独立倍数。</td></tr>
+<tr><td>当前用户</td><td>应用在任一时刻只操作一个用户的数据；各用户数据完全隔离。</td></tr>
+</table>
+
+<h2 id="s2">2. 产品概述</h2>
+<div class="card">
+<p><b>定位：</b>面向按小时计薪、存在加班的产线/工厂员工的离线记账工具。用户逐日记录班次与加班，应用按“基本工资 + 加班 + 补贴 − 五险一金 − 个税”实时核算当期收入，并提供日历、统计图表、工资条核对、CSV 数据备份。</p>
+<p><b>核心价值：</b>① 一天记一笔，随手可记（快捷标签）；② 分段加班、夜班周五/周日特例自动处理；③ 工资参数按周期版本化，历史月份不受后续调薪影响；④ 全部数据本地保存，可一键导出为单个 CSV。</p>
+<p><b>用户：</b>单设备可建多个用户（如家人），数据互相独立，记录时可一次同步给多个用户。</p>
+</div>
+
+<h2 id="s3">3. 信息架构与导航</h2>
+<h3>3.1 页面树</h3>
+<pre class="tree">首页 Home
+├─ [记加班]                → 工时记录弹窗（新增）
+├─ 快捷标签（点击）        → 一键记录“今天”（已存在则确认覆盖）
+├─ [设置]（闪电）          → 快捷记录设置页（返回首页）
+├─ 日历                    → 日历页 ── 单元格 → 工时记录弹窗（新增/编辑/删除）
+│                                    └─ 收支汇总[查看统计] → 统计页
+├─ 统计                    → 统计页（4 个标签）
+│    ├─ 加班统计
+│    ├─ 记月工资 ── 行点击 → 工资设定 / 补贴设置 / 扣除设置（带当前所看周期）
+│    ├─ 班次统计 ── 班次格 → 班次明细弹窗
+│    └─ 工资条   ── 工资核对 | 数据明细 ─ 明细项管理 / 导入数据 / 导出数据
+├─ 头像                    → 切换用户弹窗 ── 管理用户
+├─ 签到                    → （基线版无功能，保留占位）
+└─ 设置                    → 设置页
+     ├─ 用户 → 用户管理 → 用户编辑（保存/设为当前/删除）
+     ├─ 工资 → 工资页：工资设定 · 考勤周期 · 工作日设定 · 快捷记录设置
+     ├─ 补贴 → 奖金/补贴项（含编辑弹窗）
+     ├─ 扣除 → 五险 · 公积金 · 个税
+     └─ 主题 → 背景图 · 主题色</pre>
+<h3>3.2 导航规则</h3>
+<ul>
+<li><b>NAV-1</b> 采用“进入路径栈”：进入新页面时把当前页压栈；返回（页面左上角按钮或系统返回键）弹栈回到真实上一页，不写死返回目标。栈为空时回首页。</li>
+<li><b>NAV-2</b> 返回优先级：弹窗/底部面板 → 页面栈。</li>
+<li><b>NAV-3</b> 页面进入使用横向滑入 + 淡入动效，返回使用反向滑入；弹窗使用遮罩淡入 + 卡片上浮；系统开启“减少动画”时关闭动效。</li>
+<li><b>NAV-4</b> 带周期的跳转（统计 → 设置）：目标设置页的“配置周期”预置为统计页当前所看周期；从设置菜单进入则预置为今天所在周期。离开设置页后恢复为今天所在周期。</li>
+</ul>
+
+<h2 id="s4">4. 功能需求</h2>
+<p>优先级：<span class="tag p0">P0</span>必须　<span class="tag p1">P1</span>重要　<span class="tag p2">P2</span>增强。</p>
+
+<h3 id="fr-user">4.1 多用户（FR-USER）</h3>
+<table>
+<tr><th>编号</th><th>需求</th><th>验收要点</th></tr>
+<tr><td>U-1 <span class="tag p0">P0</span></td><td>首次启动自动创建默认用户：id=<code>u1</code>，昵称“我”，性别“保密”。</td><td>全新安装即可使用。</td></tr>
+<tr><td>U-2 <span class="tag p0">P0</span></td><td>用户字段：id、昵称（必填）、头像（可空，data URL）、性别（男/女/保密）、联系电话、备注。新用户 id = <code>u</code> + 当前毫秒时间戳的 36 进制。</td><td>昵称为空时保存提示“请输入昵称”。</td></tr>
+<tr><td>U-3 <span class="tag p0">P0</span></td><td>切换用户：首页头像 → 列表（当前用户高亮并标注“当前”）→ 点击他人即切换；点击当前用户仅关闭弹窗；弹窗内有“管理用户”入口。</td><td>切换后首页、日历、统计、设置全部显示新用户数据。</td></tr>
+<tr><td>U-4 <span class="tag p0">P0</span></td><td>数据隔离：记录、工资/补贴/扣除版本、快捷记录、主题、明细项、汇总显示开关、工作日、正常工时、考勤周期均按用户独立。</td><td>A 用户修改不影响 B 用户。</td></tr>
+<tr><td>U-5 <span class="tag p0">P0</span></td><td>删除用户：至少保留 1 个用户（仅 1 个时不显示删除）；需二次确认“其全部数据将被清除且无法恢复”；删除当前用户后自动切换到列表第一个用户。</td><td>删除后该用户全部存储键清空。</td></tr>
+<tr><td>U-6 <span class="tag p1">P1</span></td><td>头像：从相册选图，居中裁剪成正方形并缩放到 160×160，JPEG 质量 0.85，存为 <code>data:image/jpeg;base64,…</code>；无头像时显示昵称首字、主题色浅底圆形。</td><td>—</td></tr>
+<tr><td>U-7 <span class="tag p0">P0</span></td><td>用户切换需<b>原地完成</b>（不重启应用），并有切换动效：当前页淡出 → 新用户首页滑入 + 头像弹跳 + 顶部提示“已切换到「昵称」”。</td><td>切换耗时 &lt; 0.3 秒（含动画）。</td></tr>
+</table>
+
+<h3 id="fr-home">4.2 首页（FR-HOME）</h3>
+<ul>
+<li><b>H-1</b> 顶部背景图区域（主题背景，离线时回退为主题色渐变），左上标题“UCT salary”，右上用户头像（点击切换用户）与设置图标。</li>
+<li><b>H-2</b> 收入区：标题“MM.16 - MM.15收入”（<b>今天所在周期</b>，基线版此处为静态文本，Android 版改为动态）+ 眼睛开关；大字号显示“当月实际收入”（= 该周期统计页“本月收入”，即净收入）；下方“加班时长 / 加班收入”（今天所在周期）。眼睛关闭时三处数值分别显示 <code>****.**</code>、<code>****</code>、<code>****.**</code>。</li>
+<li><b>H-3</b> 白色功能卡片：日历、统计、签到三个入口；“记加班”主按钮；快捷记录标签横向滚动 + 右侧“设置”（虚线边框，闪电图标）。</li>
+<li><b>H-4</b> 快捷标签区文案：关闭展示时“快捷记录展示已关闭”；无数据时“暂无快捷记录”；标签文本 = 名称 + “•” + 加班小时 + “h”。</li>
+</ul>
+
+<h3 id="fr-rec">4.3 工时记录（FR-REC）</h3>
+<p>入口：首页“记加班”（日期=今天，新增）、日历单元格（有记录=编辑，无=新增）。</p>
+<table>
+<tr><th>编号</th><th>需求</th></tr>
+<tr><td>R-1 <span class="tag p0">P0</span></td><td><b>表单字段</b>：用户多选（默认全选；至少选 1 个，仅剩 1 个时不可取消）、日期、星期（自动）、基础工时（隐藏，自动）、加班倍数（1.5 / 2.0 / 3.0）、加班工时（文本）、拆分加班（可选）、班次类型（8 选 1）、备注、预计薪资（实时）。</td></tr>
+<tr><td>R-2 <span class="tag p0">P0</span></td><td><b>基础工时</b>：休息 → “休”；周末加班/节假日加班 → “0”；其余班次 → 该日星期属于“工作日集合”则取“正常工时”（默认 8），否则 0。</td></tr>
+<tr><td>R-3 <span class="tag p0">P0</span></td><td><b>新增默认值</b>：班次=夜班，加班工时=3，倍数=1.5，日夜班=用户默认日夜班（快捷设置里配置，默认夜班）。随后应用夜班特例（R-6）。</td></tr>
+<tr><td>R-4 <span class="tag p0">P0</span></td><td><b>切换班次联动</b>：休息 → 加班 0；周末加班/节假日加班 → 加班 11、倍数 2.0；其他 → 加班 3，且若上一个班次是周末/节假日加班则倍数恢复 1.5。切换后重算基础工时、备注、预计薪资。</td></tr>
+<tr><td>R-5 <span class="tag p0">P0</span></td><td><b>备注自动生成</b>（在班次、日期、加班工时变化时覆盖备注）：加班工时 ≤ 0 → “未加班”；否则 <code>前缀+工时+小时</code>，前缀为班次名（仅周末加班/节假日加班）否则为“加班”，如“加班3小时”“周末加班11小时”。分段保存时备注固定为 <code>5h为2倍，6h为1.5倍</code>（每段 <code>{小时}h为{倍数}倍</code>，用“，”连接）。</td></tr>
+<tr><td>R-6 <span class="tag p0">P0</span></td><td><b>夜班特例</b>（班次=夜班时）：<br>• 周五：倍数强制 2.0。<br>• 周日：新增/切到夜班/改日期时加班工时=11（未展开分段时仍按所选单一倍数，默认 1.5）；<b>展开拆分</b>且两段为空时自动预置“第一段 5h×2 倍 + 第二段 6h×1.5 倍”，总工时 11。<br>• 周五展开拆分且两段为空：第一段 = 总工时（缺省 3）×2 倍，第二段空。</td></tr>
+<tr><td>R-7 <span class="tag p0">P0</span></td><td><b>拆分加班</b>：默认折叠（摘要“默认按单一倍数计算”）。展开后有“第一段工时/倍数、第二段工时/倍数”（倍数可选 1.5/2/3）。<br>• 展开时若两段为空：夜班周日→5@2 + 6@1.5；夜班周五→总工时@2；其他→总工时@当前倍数。<br>• 修改任一段：加班总工时 = 两段之和（格式化）。<br>• 直接修改总工时：第二段 = 总工时 − 第一段；若总工时 &lt; 第一段则先缩短第一段。<br>• 有效分段需满足：面板展开、至少一段 &gt; 0、两段之和 = 总工时（容差 1e-6），否则视为无分段。<br>• 保存时若已展开但分段无效且加班 &gt; 0，提示“展开分段后，请填写分段工时，并确保分段工时合计等于原加班工时。”并拒绝保存。</td></tr>
+<tr><td>R-8 <span class="tag p0">P0</span></td><td><b>预计薪资</b> = 基础工时×hs + 加班工资；hs 取该日期所在周期的设置版本；休息为 ¥0；金额按 <code>fmtMoney</code>（两位小数，整数去掉 .00）。</td></tr>
+<tr><td>R-9 <span class="tag p0">P0</span></td><td><b>保存</b>：记录结构 <code>{shiftType, dayNight, hours, otHours, otRate, otSegments|null, remark, salary}</code>；对所有选中用户写入同一日期（覆盖同日旧记录）；保存后刷新日历、统计、首页汇总。未选日期提示“请选择日期”。</td></tr>
+<tr><td>R-10 <span class="tag p0">P0</span></td><td><b>删除</b>：仅编辑已有记录时显示“删除”；点击先关闭编辑弹窗再弹出确认“确认删除 / 确定要删除该日期的工时记录吗？删除后无法恢复。”；确认后删除并刷新。</td></tr>
+<tr><td>R-11 <span class="tag p1">P1</span></td><td>加班倍数标签旁有“去设置”图标，点击关闭弹窗并进入工资设定页（周期=该记录日期所在周期）。</td></tr>
+<tr><td>R-12 <span class="tag p2">P2</span></td><td>加班工时输入框：获得焦点且内容为 3 或 3.0 时清空；失去焦点且为空时恢复为 3。</td></tr>
+</table>
+
+<h3 id="fr-quick">4.4 快捷记录（FR-QUICK）</h3>
+<ul>
+<li><b>Q-1</b> 默认三条：“夜班11h”(blue, 3h, 1.5)、“白班11h”(orange, 3h, 1.5)、“周末11h”(orange, 11h, 2.0)。字段：名称、颜色类型(blue=夜班/绿色标签、orange=白班/橙色标签)、加班小时、加班倍数。</li>
+<li><b>Q-2</b> 点击首页标签 = 记录<b>今天</b>：班次推断——记录自带 shiftType 优先；名称含“周末”→周末加班；type=blue→夜班；否则白班。日夜班：夜班→“夜班”，白班→“白班”，其他→用户默认日夜班。基础工时按 R-2；加班工时取标签值。</li>
+<li><b>Q-3</b> 夜班特例同样适用：夜班周五倍数改 2.0；夜班周日且加班 &gt; 0：前 min(5, 加班) 小时 2 倍，剩余 1.5 倍成两段，备注为分段备注，否则备注“加班{h}小时”。</li>
+<li><b>Q-4</b> 若今天已有记录，先弹确认“当天已有工时记录 / {日期} 已存在记录。是否用【名称】覆盖当天原有工时数据？”（覆盖记录/取消）；成功后提示“记录成功 / 已将【名称】记录到 {日期}，工时及工资已更新。”。</li>
+<li><b>Q-5</b> 设置页：“快捷记录在首页展示”开关、“白夜班”默认选择（白班/夜班）、卡片列表（徽标夜班/白班 + 名称 + “加班小时数/加班倍数”+ 编辑）、新增快捷记录。编辑弹窗：班次名称（默认“新班次8h”）、颜色类型、加班小时数（默认 3）、加班倍数（默认 1.5）；保存空名称取“自定义班次”，倍数空取 1.0。副标题显示“N个班次”。</li>
+</ul>
+
+<h3 id="fr-cal">4.5 日历与收支汇总（FR-CAL）</h3>
+<ul>
+<li><b>C-1</b> 展示一个工资周期的日格：自 16 日起至次月 15 日，7 列（日～六），首行按 16 日的星期留空位；格高 56dp。顶部：上一周期按钮（文字“{上一周期起始月的前一月}月”）/ 周期标题“MM.16-MM.15” / 下一周期按钮（“{结束月+1}月”）；右侧切换“总/细”。</li>
+<li><b>C-2</b> 单元格内容：左上日号；有记录时右上显示<b>加班徽标</b>；总模式右下角显示当日合计，细模式在中间多显示基本工资（灰色小字）。休息显示“休”。</li>
+<li><b>C-3 颜色规则</b>（“日历颜色修正”基线）：<br>• 今天：2px 主题色边框 + 主题色 20% 底色。<br>• 夜班（日夜班=夜班且非休息、非今天）：边框为主题色。<br>• 徽标底色：默认主题色；休息灰（#9CA3AF，金额灰色）；周末加班橙（#F97316）；节假日加班红（#EF4444）；金额文字同色系。<br>• 徽标文字色：倍数恰为 2 时为近黑（#111827），其余为白色。分段记录显示多段小时数（空格分隔），每段按各自倍数着色。<br>• 单段记录徽标显示加班小时（休息不显示徽标）。</li>
+<li><b>C-4</b> 点击日格：有记录进入编辑，无记录进入新增（日期=该格）。</li>
+<li><b>C-5 收支汇总</b>（日历页下方）：六项网格 + 合计。<br>基本工资(+)、加班工资(+)、夜班补贴(+，可隐藏)、餐补=伙食补贴(+，可隐藏)、应纳税所得额(−，可隐藏)、个人五险(−，可隐藏)。眼睛按钮切换显示；隐藏项数值灰色删除线且不计入合计。合计 = Σ(可见项 符号×数值)。开关状态按用户持久化。标题行有“查看统计”按钮跳统计页（加班统计标签）。<br><b>应纳税所得额 = 当前周期“扣除 → 个人所得税(月)”设置值</b>，与设置同步。</li>
+</ul>
+
+<h3 id="fr-stats">4.6 统计（FR-STATS）</h3>
+<p>顶部：返回、标题“统计”、周期导航（上一周期月份 / “MM.16-MM.15” / 下一周期月份）、四段标签。进入统计页默认定位到今天所在周期（或最近一次导入数据所在周期）并选中“加班统计”。</p>
+<h4>A. 加班统计</h4>
+<ul>
+<li><b>S-1 总览</b>：加班收入(元)、已加班(天)、已加班(小时)。仅统计“加班小时&gt;0 且 加班工资&gt;0”的记录。</li>
+<li><b>S-2 汇总</b>：按倍数（升序）列出：倍数方块“N倍/工资”、“{hs×倍数}元/小时”、金额、小时、天数，下方占比进度条（占加班收入百分比）。分段记录按每段倍数分别累计小时与金额，天数各+1。</li>
+<li><b>S-3 加班收入分析</b>：环形图（各倍数金额），中心显示加班收入合计与“加班收入”；无数据显示“暂无加班数据”。</li>
+<li><b>S-4 加班时长统计</b>：按“单日加班时长”分组的柱状图（天数），横轴 “Nh”。<br><b>S-5 加班日期统计</b>：周期内每天一根柱（加班小时），无加班为灰色低柱，横轴为日号。</li>
+</ul>
+<h4>B. 记月工资</h4>
+<ul>
+<li><b>S-6</b> 顶部“本月收入”大数字 = 净收入。三个可折叠面板：基本项目（默认展开：基本工资、加班工资）、补贴项目（默认折叠）、扣除项目（默认折叠，有各自显示开关）。每行可点击跳转到对应设置页（NAV-4）。</li>
+<li><b>S-7</b> 补贴项目行：仅列出“启用且金额&gt;0”的补贴；按日补贴副标题“{金额}元/天 × {天数}天”，按月补贴副标题“按月”；无项目时显示“暂无补贴项目（点击去设置）”。</li>
+<li><b>S-8</b> 扣除项目行：五险个人、公积金个人、个人所得税（均显示为负）；每行右侧眼睛可单独隐藏（仅影响列表显示，<b>不影响</b>扣除合计与净收入）；全部隐藏显示“当前没有启用显示的扣除项目”。开关按用户持久化。</li>
+<li><b>S-9</b> 底部固定栏（仅本标签）：收入(gross)、扣除(−)、本月收入(net)。</li>
+</ul>
+<h4>C. 班次统计</h4>
+<ul>
+<li><b>S-10</b> 六格：早班、中班、晚班、白班、夜班、休息，显示“N天”；点击弹出“{班次} - 班次明细记录”表（序号、日期、星期、工时、基本工资、加班工资、当日合计、班次、备注），无记录显示“该周期内暂无【班次】记录”。</li>
+<li><b>S-11</b> 班次分布环形图（中心“N天/班次天数”），无数据显示“暂无班次数据”。</li>
+</ul>
+<h4>D. 工资条</h4>
+<ul>
+<li><b>S-12 工资核对</b>：表格“考勤与工时核对表”，列：员工编号(用户id)、中文名、年月(YYYY年MM月-YYYY年MM月)、公司(默认公司)、组(默认组)、标准天数(22)、平时加班(h)、双休加班(h)、节日加班(h)、中班次数、夜班次数、调休加班(0)。分类：倍数≥2.9 为节日、≥1.9 为双休、其余为平时；夜班次数仅统计周一至周五的夜班。</li>
+<li><b>S-13 数据明细</b>：“工资明细表单参数”按“明细项管理”的顺序与显示开关渲染 label/value 行，数值公式见 6.8。标签“X月社保”“预扣X月个税”的 X 取当前所看周期的起始月。</li>
+<li><b>S-14 明细项管理</b>：列表（勾选启用、名称可编辑、上移、下移、删除）、新增明细项（key=<code>custom_时间戳</code>，名称“自定义明细项”，值恒为 0）、“保存并返回”。默认 19 项见 7.3。</li>
+<li><b>S-15</b> 数据明细页底部有“导入数据 / 导出数据”（见 4.9）。</li>
+</ul>
+
+<h3 id="fr-set">4.7 设置（FR-SET）</h3>
+<table>
+<tr><th>页面</th><th>需求</th></tr>
+<tr><td>设置首页</td><td>头像+用户名 → 用户；工资（“工资、周期、工作日、快捷记录”）；补贴（“已启用项目”）；扣除（“五险一金、个税”）；主题（“背景、主题色”）。</td></tr>
+<tr><td>工资页</td><td>工资设定（月基本工资/小时工资摘要）、考勤周期（显示当前选择，如“16号-下月15号”）、工作日设定（如“周一、周二、周三、周四、周五”）、快捷记录设置（“N个班次”）。</td></tr>
+<tr><td>工资设定 <span class="tag p0">P0</span></td><td>顶部有“配置周期”切换条（‹ 周期 ›）。月基本工资 → 自动换算时薪 hs=base/21.75/8；时薪可手动覆盖（手动后不再随基本工资联动，直到再次修改基本工资）；显示平时/周末/节假日倍数（默认 1.5/2.0/3.0，可改）及“时薪×倍数=元/小时”实时结果。保存/返回均写入所选周期版本。</td></tr>
+<tr><td>补贴设置 <span class="tag p0">P0</span></td><td>列表项：名称 + 计算说明（“¥5/天 × 15天”“¥700/月”“¥5/天 × 当月天数”）+ 启用开关 + 进入编辑。默认仅展示“夜班补贴”“伙食补贴”以及用户自定义添加的项（其余 12 个默认项保留为隐藏、默认未启用）。编辑弹窗：补贴名称、金额、计算方式（按月/按日）、补贴天数（按日时显示；不填取当月全部天数）、删除/取消/保存；“自定义添加一项”默认名称“自定义补贴”、金额 100、按月。副标题“已启用 N 项”。每次变更立即写入所选周期版本。</td></tr>
+<tr><td>扣除设置 <span class="tag p0">P0</span></td><td>五险：缴费基数；养老/医疗/失业/工伤/生育 的单位%与个人%，旁显示个人金额；单位合计、个人合计。公积金：缴费基数、缴存比例%，单位/个人金额（相等）。个人所得税(月)：金额，提示“正值输入，计算时自动取负”。顶部同样有周期切换条。默认值见 7.2。</td></tr>
+<tr><td>考勤周期</td><td>滚轮选择 31 项（“1号-当月30号”，“2号-下月1号”……“31号-下月30号”），默认第 16 项“16号-下月15号”（index=15）。“确定”保存并在今天所在周期记录版本，“取消/返回”不保存。<span class="tag p2">说明</span>基线版该设置仅保存与展示，<b>日历/统计的周期仍固定为 16 日–15 日</b>，Android 版保持一致。</td></tr>
+<tr><td>工作日设定</td><td>“正常工时”滑块 1–24（默认 8）拖动即保存；周一～周日勾选（默认周一至周五）；“修改”保存。摘要：7 天=“每天”，周一到周五=“周一、周二、周三、周四、周五”，否则按顿号连接，空为“未选择”。</td></tr>
+<tr><td>主题</td><td>背景：6 张背景图（见 7.4）单选；主题色：15 色单选（默认 #22C065）。所选色应用于全局主色（按钮、徽标、选中态、图表首色）；浅色（亮度&gt;170）色块上的对勾用深灰。设置按用户保存。</td></tr>
+<tr><td>用户管理/编辑</td><td>列表（头像、昵称+“当前”标记、性别·电话·备注摘要，空为“暂无信息”）；添加用户；编辑页：头像、昵称、性别、联系电话、备注，保存 / 设为当前用户（非当前时显示）/ 删除用户（多于 1 个时显示）。</td></tr>
+</table>
+
+<h3 id="fr-cyc">4.8 按周期配置（FR-CYCLE）<span class="tag p0">P0</span></h3>
+<ul>
+<li><b>P-1</b> 基本工资、时薪、加班倍数、社保基数及五险各比例、公积金基数/比例、个税、补贴列表、考勤周期，均以<b>设置版本</b>保存。查询某周期设置：取 <code>from ≤ 周期键</code> 的最大版本（无则取最早版本）。</li>
+<li><b>P-2</b> 保存某周期的设置 = 以该周期键为 <code>from</code> 写入一份<b>完整快照</b>（同键覆盖、否则插入并按 from 排序）；<b>从该周期起生效</b>，更早周期不变，晚于它且已有自己版本的周期不变。</li>
+<li><b>P-3</b> 所有计算（单日工资、周期汇总、统计、工资条、预计薪资）一律按“目标日期/所看周期”的版本取值，不使用“当前输入框值”。</li>
+<li><b>P-4</b> 设置页的“配置周期”切换条：显示“YYYY年MM.16 - MM.15”，今天所在周期追加“（当前周期）”；左右切换周期会载入该周期版本的全部字段。</li>
+<li><b>P-5</b> 兼容：若没有任何版本（旧数据），以“工资/扣除/补贴”旧存档合成最早版本；旧版本缺失“补贴/五险比例”时，取其之前最近一个含有该字段的版本，最终回落到默认值。</li>
+</ul>
+
+<h3 id="fr-io">4.9 导入 / 导出（FR-IO）</h3>
+<ul>
+<li><b>E-1 导出</b>：弹窗“导出数据”，顶部摘要“用户：X · 单个CSV共 N 行 · 工时 … · 周期设置 … · 补贴 … · 快捷 … · 明细项 …”，下方单张预览表（隐藏全空列，最多预览 400 行）；按钮“下载CSV”“复制全部内容”“导入数据”。文件名 <code>工资APP备份_{用户名}_{yyyyMMdd-HHmm}.csv</code>，UTF-8 带 BOM。<b>只导出当前用户</b>的数据。</li>
+<li><b>E-2 格式</b>：<b>一个文件、一行表头、52 列</b>，以“类型”列区分数据，详见第 8 章。</li>
+<li><b>E-3 导入</b>：选择 CSV 文件 → 解析（UTF-8 失败回退 GBK）→ 确认框显示导入摘要（含用户不一致警告）→ 写入当前用户 → 重载并刷新所有界面 → 完成提示。</li>
+<li><b>E-4 合并规则</b>：工时记录按日期合并（同日覆盖）；周期设置/补贴/快捷记录/明细项/其他设置整体替换为文件内容（文件中不包含的部分保持不变）。</li>
+<li><b>E-5 兼容</b>：同时支持（a）单表格式（当前）；（b）旧版“分段”格式（<code>#工资APP数据导出</code> 开头、按 <code>#章节</code> 分段）；（c）最早的仅工时记录 CSV（表头含“日期”）；分隔符自动识别逗号/制表符/分号。</li>
+<li><b>E-6 提示框</b>：导入/导出相关提示统一使用与“删除工时”确认框相同的样式（白色圆角卡片、居中标题、灰色说明、左“取消”白底描边、右确认按钮；覆盖/导入确认用红色确认键）。</li>
+</ul>
+
+<h3 id="fr-nfr">4.10 动效与体验（FR-UX）</h3>
+<ul>
+<li><b>X-1</b> 页面切换、弹窗、用户切换均有动效（NAV-3、U-7）。</li>
+<li><b>X-2</b> 删除、覆盖等破坏性操作必须二次确认。</li>
+<li><b>X-3</b> 金额统一格式 <code>fmtMoney</code>（见 6.1）；眼睛按钮可隐藏敏感金额。</li>
+</ul>
+
+<h2 id="s5">5. 业务规则速查</h2>
+<table>
+<tr><th>规则</th><th>说明</th></tr>
+<tr><td>班次→日夜班</td><td>记录的 dayNight 缺省时：班次为白班/夜班则取班次本身，否则取用户默认日夜班。</td></tr>
+<tr><td>休息日</td><td>基础工时“休”，当日工资 0，不计加班。</td></tr>
+<tr><td>周末加班 / 节假日加班</td><td>基础工时 0；默认加班 11h、2.0 倍。</td></tr>
+<tr><td>夜班周五</td><td>加班倍数 2.0。</td></tr>
+<tr><td>夜班周日</td><td>默认加班 11h；拆分后 5h×2 + 6h×1.5。</td></tr>
+<tr><td>快捷记录同日覆盖</td><td>需确认。</td></tr>
+</table>
+
+<h2 id="s6">6. 计算公式</h2>
+<h3>6.1 格式化</h3>
+<ul>
+<li><code>fmtMoney(n)</code>：<code>n.toFixed(2)</code>（按二进制精确值四舍五入，等同 BigDecimal(n) HALF_UP）；结果为 <code>-0.00</code> 时取 <code>0.00</code>；以 <code>.00</code> 结尾则去掉“.00”。例：267.96、1811.41、3730、0。</li>
+<li><code>formatHourNumber(n)</code>：数值转字符串（整数不带小数点，如 3、2.5）。</li>
+</ul>
+<h3>6.2 时薪 hs</h3>
+<pre><code>d  = base / 21.75 / 8                      // 高精度，不取整
+st = hourSalaryExact ?: hourSalary          // 版本存档值
+if st ≤ 0 → hs = d
+if d &gt; 0 且 st ≠ d 且 |st−d| &lt; 0.005 且 st 恰为两位小数 → hs = d   // 视为被四舍五入后的存档值，还原
+否则 hs = st</code></pre>
+<p>例：base=3730 → hs = <code>21.436781609195403</code>；base=5000 → <code>28.735632183908045</code>。</p>
+<h3>6.3 单日工资 recPay</h3>
+<pre><code>hours == "休"            → base=0, ot=0, total=0
+base = (hours 数值 或 0) × hs
+ot   = otSegments 非空 ? Σ(seg.hours × hs × seg.rate(缺省1)) : otHours × hs × (otRate 缺省1)
+total = base + ot</code></pre>
+<h3>6.4 周期</h3>
+<pre><code>cycleKeyOfDate(d) = (day ≥ 16 ? 次月 : 当月) 的 YYYYMM
+周期(key=YYYYMM) = [上月16日, 当月15日]；上月：month==1 → 去年12月
+getCycleRecordKeys = 周期内全部有记录的日期（升序）</code></pre>
+<h3>6.5 补贴</h3>
+<pre><code>subsidyDays(item) = mode=="daily" ? (days&gt;0 ? days : 周期结束月的自然日数) : 0
+subsidyValue(item) = !enabled ? 0 : (mode=="daily" ? amount × subsidyDays : amount)</code></pre>
+<p>例：夜班补贴 5 元/天 × 15 天 = 75；8 元/天 × 当月天数（11 月 30 天）= 240。</p>
+<h3>6.6 扣除</h3>
+<pre><code>五险个人 = 社保基数 × (养老+医疗+失业+工伤+生育 个人比例之和) / 100     （按该周期版本）
+五险单位 = 社保基数 × (五项单位比例之和) / 100
+公积金个人 = 公积金基数 × 缴存比例 / 100         （单位相同）
+个税 = 个人所得税(月)设置值</code></pre>
+<h3>6.7 统计与收入</h3>
+<pre><code>otIncome   = Σ 有加班记录的 ot            （otHours&gt;0 且 ot&gt;0）
+basicTotal = 基本工资 + otIncome
+subTotal   = Σ 启用且&gt;0 的补贴值
+gross      = basicTotal + subTotal
+totalDeduct= 五险个人 + 公积金个人 + 个税        （与显示开关无关）
+net        = gross − totalDeduct                  → 首页“当月实际收入”、统计“本月收入”
+收支汇总合计 = base + ot + (夜班补贴) + (餐补) − 应纳税所得额(=个税设置值) − 五险个人    （仅计入可见项）</code></pre>
+<h3>6.8 工资条明细项取值</h3>
+<table>
+<tr><th>key</th><th>默认名称</th><th>值</th></tr>
+<tr><td>ym</td><td>年月</td><td><code>YYYY.MM-YYYY.MM</code>（周期起止月）</td></tr>
+<tr><td>std_days</td><td>标准天数</td><td>22（固定）</td></tr>
+<tr><td>norm_ot / dbl_ot</td><td>平时/双休加班小时</td><td>各段倍数 ≥1.9 计入双休，否则平时；formatHourNumber</td></tr>
+<tr><td>mid_cnt / night_cnt</td><td>中班/夜班次数</td><td>中班天数；夜班且周一～周五的天数</td></tr>
+<tr><td>annual_leave、other_adj、holidays、shift_allowance、accom、borrow</td><td>年假小时…借支</td><td>0（占位）</td></tr>
+<tr><td>base_sal</td><td>基本工资</td><td>fmtMoney(base)</td></tr>
+<tr><td>overtime</td><td>加班</td><td>fmtMoney(otIncome)</td></tr>
+<tr><td>meal_sub</td><td>餐费补贴</td><td>伙食补贴的补贴值</td></tr>
+<tr><td>income</td><td>收入额</td><td>base + ot + 全部补贴</td></tr>
+<tr><td>social</td><td>X月社保</td><td>五险个人 + 公积金个人</td></tr>
+<tr><td>tax</td><td>预扣X月个税</td><td>个税</td></tr>
+<tr><td>net</td><td>实发工资</td><td>base + ot + 全部补贴 − 五险个人 − 公积金个人 − 个税</td></tr>
+<tr><td>custom_*</td><td>自定义</td><td>0</td></tr>
+</table>
+
+<h2 id="s7">7. 数据模型与存储</h2>
+<h3>7.1 存储键</h3>
+<p>基线版使用 localStorage；Android 版使用 SharedPreferences，<b>键名与 JSON 结构保持一致</b>，便于互通。用户键：<code>u1</code> 无前缀，其他用户为 <code>{id}__{键名}</code>。</p>
+<table>
+<tr><th>键</th><th>内容</th></tr>
+<tr><td><code>app_users_list</code></td><td>[{id,name,avatar,gender,phone,remark}]</td></tr>
+<tr><td><code>app_current_user</code></td><td>当前用户 id</td></tr>
+<tr><td><code>daily_records_map</code></td><td>{ "YYYY-MM-DD": {shiftType,dayNight,hours,otHours,otRate,otSegments,remark,salary} }</td></tr>
+<tr><td><code>settings_history_data</code></td><td>设置版本数组（见 7.2）</td></tr>
+<tr><td><code>quick_settings_data</code></td><td>{show,records:[{name,type,hours,rate}],dayNight}</td></tr>
+<tr><td><code>sheet_items_config</code></td><td>[{key,label,enabled}]</td></tr>
+<tr><td><code>theme_settings_data</code></td><td>{bg,color}</td></tr>
+<tr><td><code>summary_visibility_data</code></td><td>{night,meal,taxable,social}</td></tr>
+<tr><td><code>deduction_stats_visibility_data</code></td><td>{social,housing,tax}</td></tr>
+<tr><td><code>cycle_settings_data</code></td><td>考勤周期序号 0–30</td></tr>
+<tr><td><code>workday_settings_data</code></td><td>["周一",…]</td></tr>
+<tr><td><code>normal_hours_data</code></td><td>正常工时 1–24</td></tr>
+<tr><td>（兼容读取）<code>salary_settings_data</code> / <code>deduction_settings_data</code> / <code>subsidy_settings_data</code></td><td>旧版单份设置，仅在无版本历史时用于合成最早版本</td></tr>
+</table>
+<h3>7.2 设置版本与默认值</h3>
+<pre><code>SettingsVersion {
+  from: "000000" | "YYYYMM",
+  salary:    { baseSalary:"3730", hourSalary:"21.436781609195403", hourSalaryExact:"21.43…",
+               rate1:"1.5", rate2:"2.0", rate3:"3.0" },
+  deduction: { socialBase:"7546", housingBase:"2690", housingRate:"5", incomeTax:"102.16",
+               rates:{ pensionUnitRate:"16", pensionPersonalRate:"8", medUnitRate:"9", medPersonalRate:"2",
+                       unempUnitRate:"0.5", unempPersonalRate:"0.5", injuryUnitRate:"0.5", injuryPersonalRate:"0",
+                       maternityUnitRate:"0", maternityPersonalRate:"0" } },
+  subsidy:   [ {name,amount,enabled,mode:"monthly|daily",days} … ],
+  cycle:     15
+}</code></pre>
+<p>默认补贴列表（14 项）：白班补贴0、<b>夜班补贴 5 元/天×15 天（启用）</b>、中班补贴0、早班补贴0、晚班补贴0、全勤奖200（未启用）、岗位补贴0、<b>伙食补贴 700/月（启用）</b>、生活补贴0、高温补贴0、星级补贴0、环境补贴0、交通补贴0、绩效补贴0（除标注外均未启用）。默认个人五险合计 = 7546×10.5% = 792.33；公积金 2690×5% = 134.50。</p>
+<h3>7.3 工资条默认明细项（19 项，均启用）</h3>
+<p>年月、标准天数、平时加班小时、双休加班小时、中班次数、夜班次数、年假小时、基本工资、其他调整、各类假期、翻班津贴、加班、餐费补贴、收入额、住宿费、9月社保、借支、预扣9月个税、实发工资（key 见 6.8；“9月”在显示时替换为当前周期起始月）。</p>
+<h3>7.4 主题</h3>
+<p>主题色 15 个：#E74C3C #F84685 #FF9500 #F1C40F #E9F4B9 #22C065 #24B72F #B6D999 #B7E9C8 #16C3A7 #99D8E6 #2A9CDF #3498DB #537DFC #C9E3F7，默认 #22C065。背景图 6 张（picsum id 605/537/495/932/221/609，尺寸 536×354），默认第 1 张。</p>
+
+<h2 id="s8">8. CSV 导入导出规范</h2>
+<p>单个 UTF-8(BOM) CSV，首行为表头，共 52 列，数据行按“类型”分组、顺序固定：元信息 → 其他设置 → 周期设置 → 周期补贴 → 快捷记录 → 明细项 → 周期汇总 → 工时记录。各类型只填写与自己相关的列，其余留空。字段含逗号/引号/换行时按 RFC4180 加引号。</p>
+<h3>8.1 列定义（顺序）</h3>
+<p><code>类型, 周期/日期, 周期范围, 序号, 名称, 值, 标识/类型, 星期, 班次, 日夜班, 基础工时, 加班小时, 加班倍数, 备注, 当日工资, 金额, 计算方式, 天数, 启用/显示, 分段倍数, 月基本工资, 小时工资, 平时加班倍数, 周末加班倍数, 节假日加班倍数, 社保基数, 养老单位%, 养老个人%, 医疗单位%, 医疗个人%, 失业单位%, 失业个人%, 工伤单位%, 工伤个人%, 生育单位%, 生育个人%, 公积金基数, 公积金比例%, 个税(月), 考勤周期, 个人五险合计(自动计算), 单位五险合计(自动计算), 公积金个人(自动计算), 记录天数, 平时加班小时, 双休加班小时, 基本工资, 加班工资, 补贴合计, 个人五险, 公积金, 实发工资</code></p>
+<h3>8.2 各类型使用的列</h3>
+<table>
+<tr><th>类型</th><th>使用的列（→ 含义）</th></tr>
+<tr><td>元信息</td><td>名称=项目、值：应用、格式版本(2)、导出时间、用户ID、用户名、性别、手机、备注、工时记录数、周期设置数、周期补贴项数（导入仅用于核对用户）</td></tr>
+<tr><td>其他设置</td><td>名称=项目、值：考勤周期、考勤周期说明(自动)、工作日(以“|”分隔)、正常工时、默认白夜班、首页展示快捷记录(是/否)、汇总显示-夜班补贴/伙食补贴/应纳税所得额/个人五险(是/否)、主题背景(URL)、主题色；Android 扩展：统计显示-五险/公积金/个税(是/否)</td></tr>
+<tr><td>周期设置</td><td>周期/日期=生效周期(“起始”或 YYYYMM)、周期范围(只读)、月基本工资、小时工资、三档倍数、社保基数、五险十项比例、公积金基数/比例%、个税(月)、考勤周期、三个“自动计算”列(导入忽略)</td></tr>
+<tr><td>周期补贴</td><td>周期/日期=生效周期、序号、名称=补贴名称、金额、计算方式(按月/按日)、天数、启用/显示=启用(是/否)</td></tr>
+<tr><td>快捷记录</td><td>名称、标识/类型=blue|orange、加班小时、加班倍数</td></tr>
+<tr><td>明细项</td><td>序号=顺序、标识/类型=key、名称、启用/显示=显示(是/否)</td></tr>
+<tr><td>周期汇总</td><td>周期/日期=周期键、周期范围、记录天数、平时/双休加班小时、基本工资、加班工资、补贴合计、个人五险、公积金、个税(月)、实发工资（只读，导入忽略）</td></tr>
+<tr><td>工时记录</td><td>周期/日期=日期(YYYY-MM-DD)、星期、班次、日夜班、基础工时、加班小时、加班倍数、备注、当日工资(只读)、分段倍数(JSON，如 <code>[{"hours":5,"rate":2},{"hours":6,"rate":1.5}]</code>，无分段为 <code>[]</code>)</td></tr>
+</table>
+<h3>8.3 导入校验</h3>
+<ul>
+<li>日期：接受 <code>2026-10-01</code>、<code>2026/10/1</code>、<code>2026.10.1</code>、<code>2026年10月1日</code>、<code>20261001</code>，并校验真实存在。</li>
+<li>班次必须在 {早班,中班,晚班,白班,夜班,休息,平时加班,周末加班,调休加班,节假日加班}，否则该行跳过；班次为空时：基础工时为“休”→休息，否则夜班。</li>
+<li>基础工时缺失时按 R-2 推算；加班小时缺失或负数按 0；倍数缺失：周末加班/节假日加班取 2.0，其余 1.5。休息强制工时“休”、加班 0。</li>
+<li>数字列去除 <code>%</code>、<code>¥</code>、逗号后再校验，非法回落默认值（周期设置）或跳过该行（补贴金额非法、快捷记录小时/倍数非法、明细项 key 为空/重复）。</li>
+<li>生效周期接受 <code>起始/最早/0</code>、<code>202610</code>、<code>2026-10</code>、<code>2026年10月</code>；补贴行引用不存在的周期时跳过。</li>
+<li>主题背景/主题色必须在内置列表内才应用；考勤周期 0–30；正常工时 1–24；工作日仅接受周一～周日。</li>
+<li>当日工资按导入后各周期设置<b>重新计算</b>，不信任文件中的值。</li>
+<li>导入确认摘要示例：“将导入到当前用户「X」：· 工时记录 N 条（新增 a，覆盖 b）· 周期设置 … · 周期补贴 … · 快捷记录 … · 明细项 … · 其他设置 … · 跳过无法识别的 k 行”。</li>
+</ul>
+
+<h2 id="s9">9. 非功能需求</h2>
+<table>
+<tr><th>类别</th><th>要求</th></tr>
+<tr><td>离线</td><td>全部功能离线可用；背景图为网络图片，无网时回退主题色渐变，不影响功能。</td></tr>
+<tr><td>性能</td><td>冷启动到首页 &lt; 1.5 秒；切换用户 &lt; 0.3 秒；一周期 31 天日历渲染无卡顿；1 万条记录下统计 &lt; 200ms。</td></tr>
+<tr><td>数据安全</td><td>数据仅存本机；不申请网络之外的敏感权限；导出由用户经系统文件选择器指定位置。</td></tr>
+<tr><td>兼容</td><td>Android 8.0 (API 26) 及以上；界面为浅色主题（与基线版一致，主题色可换）；字体缩放 ≤1.3 时布局不溢出。</td></tr>
+<tr><td>可靠</td><td>存储写入失败不应崩溃；JSON 解析失败回落默认值；导入失败不改动现有数据。</td></tr>
+<tr><td>可测试</td><td>计算层为纯函数，附带单元测试（黄金用例见第 11 章）。</td></tr>
+</table>
+
+<h2 id="s10">10. Android 实现方案</h2>
+<h3>10.1 技术选型</h3>
+<ul>
+<li>Kotlin 2.0、Jetpack Compose + Material 3、单 Activity；minSdk 26 / targetSdk 34。</li>
+<li>状态：<code>AppViewModel</code>（Compose 快照状态）+ 纯函数计算层；导航用自有页面栈 + <code>AnimatedContent</code>（与 NAV-1 一致）。</li>
+<li>存储：SharedPreferences + kotlinx.serialization（键名/结构同基线版）。</li>
+<li>图片：Coil 加载背景图；图表使用 Compose Canvas 自绘（环形图、柱状图），无第三方图表依赖。</li>
+<li>文件：Storage Access Framework（<code>CreateDocument</code> / <code>OpenDocument</code>）读写 CSV，无需存储权限。</li>
+</ul>
+<h3>10.2 模块对照</h3>
+<table>
+<tr><th>需求</th><th>Android 文件</th></tr>
+<tr><td>数据模型、宽松 JSON 序列化</td><td><code>model/Models.kt</code>、<code>model/Serializers.kt</code></td></tr>
+<tr><td>日期/周期/格式化 (6.1,6.4)</td><td><code>core/Dates.kt</code>、<code>core/Format.kt</code></td></tr>
+<tr><td>设置版本、recPay、补贴、统计、工资条 (6.2–6.8, P-1…P-5)</td><td><code>core/Calc.kt</code></td></tr>
+<tr><td>CSV 导入导出 (第 8 章)</td><td><code>core/CsvIo.kt</code></td></tr>
+<tr><td>存储读写、旧数据兼容 (7.1)</td><td><code>data/Store.kt</code>、<code>data/Repository.kt</code></td></tr>
+<tr><td>全局状态、用户、导航、弹窗、用户切换 (FR-USER, NAV)</td><td><code>ui/AppViewModel.kt</code></td></tr>
+<tr><td>工时表单与联动 (FR-REC)</td><td><code>ui/RecordForm.kt</code>、<code>ui/screens/RecordSheet.kt</code></td></tr>
+<tr><td>首页、日历 (FR-HOME, FR-CAL)</td><td><code>ui/screens/HomeScreen.kt</code>、<code>CalendarScreen.kt</code></td></tr>
+<tr><td>统计四标签 (FR-STATS)</td><td><code>ui/screens/StatsScreen.kt</code>、<code>ui/components/Charts.kt</code></td></tr>
+<tr><td>设置各页 (FR-SET, FR-CYCLE, FR-QUICK)</td><td><code>ui/screens/SettingsScreens.kt</code>（工资/补贴/扣除/周期/工作日）、<code>MoreSettingsScreens.kt</code>（快捷记录/主题）、<code>ui/components/Common.kt → CycleConfigBar</code></td></tr>
+<tr><td>用户管理/编辑 (FR-USER)</td><td><code>ui/screens/UserScreens.kt</code></td></tr>
+<tr><td>明细项管理、导入导出 (S-14, FR-IO)</td><td><code>ui/screens/SheetManageScreen.kt</code>、<code>ui/screens/ExportImport.kt</code></td></tr>
+<tr><td>统一弹窗样式 (E-6)</td><td><code>ui/components/Common.kt → AppDialog</code></td></tr>
+<tr><td>单元测试</td><td><code>app/src/test/…/CalcTest.kt</code>、<code>CsvTest.kt</code></td></tr>
+</table>
+<h3>10.3 与基线版的差异（有意改进）</h3>
+<ul>
+<li>首页收入标题改为随今天所在周期动态显示（基线版为静态文本）。</li>
+<li>补贴设置页：除“夜班补贴/伙食补贴”外，<b>用户自定义添加的补贴项也可见、可编辑</b>（基线版新增后会被隐藏，却仍参与计算）。</li>
+<li>日期选择、相册选图、文件读写改用 Android 原生控件；导出/导入走系统文件选择器。</li>
+<li>用户切换在应用内原地完成，不重启。</li>
+</ul>
+<h3>10.4 构建与运行</h3>
+<p>用 Android Studio（Koala 2024.1 及以上，JDK 17）打开工程根目录，等待 Gradle 同步，运行 <code>app</code> 即可；命令行：<code>./gradlew assembleDebug</code>、<code>./gradlew testDebugUnitTest</code>（需先在 Android Studio 中同步一次以生成 wrapper，或本机安装 Gradle 8.9 后执行 <code>gradle wrapper</code>）。</p>
+
+<h2 id="s11">11. 验收用例（基线版实测黄金值）</h2>
+<div class="ok">以下数值全部由基线版在同一份测试数据上运行得到。测试数据：用户 u1；设置版本 <code>000000</code>（基本工资 3730，社保基数 7546，个税 102.16，补贴：夜班补贴 5 元/天×15 天启用、伙食补贴 700 启用、全勤奖 200 未启用）与 <code>202611</code>（基本工资 5000，社保基数 8000，养老个人 10%、医疗个人 2.5%，公积金基数 3000/6%，个税 200，补贴：夜班补贴 8 元/天（不填天数）、伙食补贴 900、全勤奖 300，均启用）；工作日周一～周五，正常工时 8。</div>
+<h3>11.1 测试记录与单日工资</h3>
+<table><tr><th>日期</th><th>星期</th><th>班次</th><th>基础工时</th><th>加班h</th><th>倍数</th><th>分段</th><th>hs</th><th>基本工资</th><th>加班工资</th><th>当日合计(显示)</th></tr><tr><td>2026-09-16</td><td>周三</td><td>夜班</td><td class=num>8</td><td class=num>3</td><td class=num>1.5</td><td>—</td><td class=num>21.436781609195403</td><td class=num>171.49425287356323</td><td class=num>96.4655172413793</td><td class=num><b>267.96</b></td></tr><tr><td>2026-09-18</td><td>周五</td><td>夜班</td><td class=num>8</td><td class=num>3</td><td class=num>2.0</td><td>—</td><td class=num>21.436781609195403</td><td class=num>171.49425287356323</td><td class=num>128.6206896551724</td><td class=num><b>300.11</b></td></tr><tr><td>2026-09-20</td><td>周日</td><td>夜班</td><td class=num>0</td><td class=num>11</td><td class=num>2.0</td><td>5h×2 + 6h×1.5</td><td class=num>21.436781609195403</td><td class=num>0</td><td class=num>407.2988505747127</td><td class=num><b>407.30</b></td></tr><tr><td>2026-09-21</td><td>周一</td><td>白班</td><td class=num>8</td><td class=num>3</td><td class=num>1.5</td><td>—</td><td class=num>21.436781609195403</td><td class=num>171.49425287356323</td><td class=num>96.4655172413793</td><td class=num><b>267.96</b></td></tr><tr><td>2026-09-22</td><td>周二</td><td>中班</td><td class=num>8</td><td class=num>0</td><td class=num>1.5</td><td>—</td><td class=num>21.436781609195403</td><td class=num>171.49425287356323</td><td class=num>0</td><td class=num><b>171.49</b></td></tr><tr><td>2026-09-26</td><td>周六</td><td>周末加班</td><td class=num>0</td><td class=num>11</td><td class=num>2.0</td><td>—</td><td class=num>21.436781609195403</td><td class=num>0</td><td class=num>471.6091954022989</td><td class=num><b>471.61</b></td></tr><tr><td>2026-10-01</td><td>周四</td><td>节假日加班</td><td class=num>0</td><td class=num>8</td><td class=num>3.0</td><td>—</td><td class=num>21.436781609195403</td><td class=num>0</td><td class=num>514.4827586206897</td><td class=num><b>514.48</b></td></tr><tr><td>2026-10-02</td><td>周五</td><td>休息</td><td class=num>休</td><td class=num>0</td><td class=num>1.5</td><td>—</td><td class=num>21.436781609195403</td><td class=num>0</td><td class=num>0</td><td class=num><b>0</b></td></tr><tr><td>2026-10-05</td><td>周一</td><td>夜班</td><td class=num>8</td><td class=num>3</td><td class=num>1.5</td><td>—</td><td class=num>21.436781609195403</td><td class=num>171.49425287356323</td><td class=num>96.4655172413793</td><td class=num><b>267.96</b></td></tr><tr><td>2026-10-20</td><td>周二</td><td>夜班</td><td class=num>8</td><td class=num>3</td><td class=num>1.5</td><td>—（周期202611）</td><td class=num>28.735632183908045</td><td class=num>229.88505747126436</td><td class=num>129.3103448275862</td><td class=num><b>359.20</b></td></tr><tr><td>2026-11-06</td><td>周五</td><td>周末加班</td><td class=num>0</td><td class=num>11</td><td class=num>2.0</td><td>—（周期202611）</td><td class=num>28.735632183908045</td><td class=num>0</td><td class=num>632.183908045977</td><td class=num><b>632.18</b></td></tr></table><p>设置查询：<code>settingsAt("202610")</code> = base 3730、hs 21.436781609195403、五险个人 792.33、公积金 134.5、个税 102.16；<code>settingsAt("202611")</code> = base 5000、hs 28.735632183908045、五险个人 1040、公积金 180、个税 200。</p>
+<h3>11.2 周期汇总结果</h3>
+<table><tr><th>指标</th><th>周期 202610（09.16–10.15）</th><th>周期 202611（10.16–11.15）</th></tr><tr><td>周期标题</td><td class=num>09.16-10.15</td><td class=num>10.16-11.15</td></tr><tr><td>加班收入 / 天数 / 小时</td><td class=num>1811.41 / 7 / 42</td><td class=num>761.49 / 2 / 14</td></tr><tr><td>倍数汇总行</td><td class=num>1.5倍 工资 32.1551724137931元/小时 ¥482.33 15小时 4天 2倍 工资 42.87356321839081元/小时 ¥814.60 19小时 3天 3倍 工资 64.3103448275862元/小时 ¥514.48 8小时 1天</td><td class=num>1.5倍 工资 43.103448275862064元/小时 ¥129.31 3小时 1天 2倍 工资 57.47126436781609元/小时 ¥632.18 11小时 1天</td></tr><tr><td>基本项目合计（基本+加班）</td><td class=num>5541.41</td><td class=num>5761.49</td></tr><tr><td>补贴项目行</td><td class=num>夜班补贴 5元/天 × 15天 75 伙食补贴 按月 700</td><td class=num>夜班补贴 8元/天 × 30天 240 伙食补贴 按月 900 全勤奖 按月 300</td></tr><tr><td>补贴合计</td><td class=num>775</td><td class=num>1440</td></tr><tr><td>扣除项目行</td><td class=num>五险个人 -792.33 公积金个人 -134.50 个人所得税 -102.16</td><td class=num>五险个人 -1040 公积金个人 -180 个人所得税 -200</td></tr><tr><td>扣除合计</td><td class=num>-1028.99</td><td class=num>-1420</td></tr><tr><td>收入 gross</td><td class=num>6316.41</td><td class=num>7201.49</td></tr><tr><td>本月收入 net</td><td class=num>5287.42</td><td class=num>5781.49</td></tr><tr><td>班次天数</td><td class=num>早班0天、中班1天、晚班0天、白班1天、夜班4天、休息1天</td><td class=num>早班0天、中班0天、晚班0天、白班0天、夜班1天、休息0天</td></tr><tr><td>computeCycleSummary</td><td class=num>base 3730; ot 1811.4080459770114; night 75; meal 700; taxable 102.16; social 792.33</td><td class=num>base 5000; ot 761.4942528735631; night 240; meal 900; taxable 200; social 1040</td></tr><tr><td>日历收支汇总文案</td><td class=num>收支汇总 查看统计 基本工资 3730 加班工资 1811.41 夜班补贴 75 餐补 700 应纳税所得额 102.16 个人五险 792.33 合计 5421.92</td><td class=num>收支汇总 查看统计 基本工资 5000 加班工资 761.49 夜班补贴 240 餐补 900 应纳税所得额 200 个人五险 1040 合计 5661.49</td></tr><tr><td>工资核对行(平时/双休/节日/中班/夜班/调休)</td><td class=num>15 / 19 / 8 / 1 / 3 / 0</td><td class=num>3 / 11 / 0 / 0 / 1 / 0</td></tr><tr><td>工资条·年月</td><td class=num>2026.09-2026.10</td><td class=num>2026.10-2026.11</td></tr><tr><td>工资条·平时加班小时</td><td class=num>15</td><td class=num>3</td></tr><tr><td>工资条·双休加班小时</td><td class=num>27</td><td class=num>11</td></tr><tr><td>工资条·中班次数</td><td class=num>1</td><td class=num>0</td></tr><tr><td>工资条·夜班次数</td><td class=num>3</td><td class=num>1</td></tr><tr><td>工资条·基本工资</td><td class=num>3730</td><td class=num>5000</td></tr><tr><td>工资条·加班</td><td class=num>1811.41</td><td class=num>761.49</td></tr><tr><td>工资条·餐费补贴</td><td class=num>700</td><td class=num>900</td></tr><tr><td>工资条·收入额</td><td class=num>6316.41</td><td class=num>7201.49</td></tr><tr><td>工资条·X月社保（五险+公积金）</td><td class=num>926.83</td><td class=num>1220</td></tr><tr><td>工资条·预扣个税</td><td class=num>102.16</td><td class=num>200</td></tr><tr><td>工资条·实发工资</td><td class=num>5287.42</td><td class=num>5781.49</td></tr><tr><td>日历有记录的格（日 徽标 金额）</td><td class=num>16 3 267.96；18 3 300.11；20 5 6 407.30；21 3 267.96；22 0 171.49；26 11 471.61；1 8 514.48；2 休；5 3 267.96</td><td class=num>20 3 359.20；6 11 632.18</td></tr></table><p class="note">注：工资条“X月社保”= 五险个人 + 公积金个人（202610：792.33+134.50=926.83；202611：1040+180=1220）。工资核对表与工资条的加班分类阈值不同（见 S-12 / 6.8）：09.16–10.15 周期核对表为 平时15 / 双休19 / 节日8，工资条为 平时15 / 双休27。</p>
+<h3>11.3 工时弹窗联动</h3>
+<table><tr><th>新增日期</th><th>点选班次</th><th>星期</th><th>基础工时</th><th>加班h</th><th>倍数</th><th>自动备注</th><th>预计薪资</th></tr><tr><td>2026-10-09</td><td>夜班</td><td>周五</td><td class=num>8</td><td class=num>3</td><td class=num>2.0</td><td>加班3小时</td><td class=num><b>¥300.11</b></td></tr><tr><td>2026-10-11</td><td>夜班</td><td>周日</td><td class=num>0</td><td class=num>11</td><td class=num>1.5</td><td>加班11小时</td><td class=num><b>¥353.71</b></td></tr><tr><td>2026-10-10</td><td>夜班</td><td>周六</td><td class=num>0</td><td class=num>3</td><td class=num>1.5</td><td>加班3小时</td><td class=num><b>¥96.47</b></td></tr><tr><td>2026-10-12</td><td>白班</td><td>周一</td><td class=num>8</td><td class=num>3</td><td class=num>1.5</td><td>加班3小时</td><td class=num><b>¥267.96</b></td></tr></table><p>（使用设置版本 <code>000000</code> 的时薪；夜班周日未展开拆分时按单一倍数 1.5。）</p>
+<h3>11.4 其他验收项</h3>
+<table>
+<tr><th>编号</th><th>步骤</th><th>期望</th></tr>
+<tr><td>AC-1</td><td>全新安装启动</td><td>默认用户“我”；快捷记录 3 条；补贴设置显示夜班补贴(¥5/天 × 15天)、伙食补贴(¥700/月)；收入显示基础值。</td></tr>
+<tr><td>AC-2</td><td>新增 A、B 两个用户并切换；各自记一条记录</td><td>互不可见；切换耗时 &lt; 0.3 秒，有淡出/滑入/头像弹跳/提示。</td></tr>
+<tr><td>AC-3</td><td>在统计页查看上一周期 → 点“基本工资”行 → 改基本工资 → 保存</td><td>配置周期条显示上一周期；保存后仅该周期及其后无独立版本的周期变化；更晚已有版本的周期不变。</td></tr>
+<tr><td>AC-4</td><td>修改“个人所得税(月)”后查看日历收支汇总</td><td>“应纳税所得额”等于所改个税值，合计同步变化。</td></tr>
+<tr><td>AC-5</td><td>导出 → 切换到空用户 → 导入</td><td>确认框提示用户不一致；导入后记录、各周期设置/补贴/比例、快捷记录、明细项、工作日、主题全部一致；周期汇总数值与源用户相同。</td></tr>
+<tr><td>AC-6</td><td>导出文件检查</td><td>仅 1 个文件；仅 1 行表头；52 列；无 “#” 分段行；各行列数一致；带 BOM。</td></tr>
+<tr><td>AC-7</td><td>用旧版分段 CSV、最早版仅工时 CSV 导入</td><td>均可导入；坏行被跳过并在摘要中提示。</td></tr>
+<tr><td>AC-8</td><td>点击快捷标签（今天已有记录）</td><td>先弹确认；确认后覆盖并提示“记录成功”。</td></tr>
+<tr><td>AC-9</td><td>删除工时</td><td>先关编辑弹窗，再弹确认框；样式与导入确认框一致。</td></tr>
+<tr><td>AC-10</td><td>在设置页按系统返回键 / 左上角返回</td><td>回到进入前的页面（真实路径）。</td></tr>
+</table>
+
+<h2 id="s12">12. 已知限制与待确认事项</h2>
+<table>
+<tr><th>#</th><th>事项</th><th>处理</th></tr>
+<tr><td>1</td><td>“考勤周期”滚轮仅保存与展示，不改变 16–15 的周期计算。</td><td>Android 保持一致；如需真正按所选起始日计算，需另行评审（影响周期键、日历、统计、导入导出）。</td></tr>
+<tr><td>2</td><td>“签到”入口无功能。</td><td>占位，点击无动作。</td></tr>
+<tr><td>3</td><td>工资条中的标准天数(22)、年假、其他调整、假期、翻班津贴、住宿费、借支为固定值/占位 0。</td><td>保持；自定义明细项值恒为 0。</td></tr>
+<tr><td>4</td><td>收支汇总中“应纳税所得额”实为个税金额，且按减项计入合计。</td><td>按现行基线行为实现；名称可后续评审是否改为“个税”。</td></tr>
+<tr><td>5</td><td>个税为手工输入，不按税率表自动计算。</td><td>保持。</td></tr>
+<tr><td>6</td><td>背景图依赖网络。</td><td>离线回退渐变；后续可内置图片。</td></tr>
+</table>
+
+<footer style="margin-top:50px;color:var(--sub);font-size:12px;border-top:1px solid var(--line);padding-top:14px">UCT salary 需求说明书 v1.0 · 验收数值由基线版“工资APP_日历颜色修正版.html”实测生成。</footer>
+</main>
+</div>
+<script>
+(function(){var t=document.getElementById('toc');document.querySelectorAll('main h2, main h3').forEach(function(h,i){if(!h.id)h.id='h'+i;var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent.replace(/P0|P1|P2/g,'').trim();if(h.tagName==='H3')a.className='h3';t.appendChild(a);});})();
+</script>
+</body>
+</html>
