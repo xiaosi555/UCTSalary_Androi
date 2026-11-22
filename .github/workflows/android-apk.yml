@@ -16,8 +16,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout main branch
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -30,54 +32,78 @@ jobs:
         with:
           packages: platform-tools
 
-      - name: Install Android platform and build tools
-        shell: bash
-        run: |
-          set -euo pipefail
-          sdkmanager "platforms;android-35" "build-tools;35.0.0"
-
-      - name: Inspect and extract Android project
+      - name: Extract project and detect build versions
+        id: project
         shell: bash
         run: |
           set -euo pipefail
           test -f UCTSalary_Android.zip
           mkdir -p extracted
           unzip -q UCTSalary_Android.zip -d extracted
-          echo "Archive contents:"
-          find extracted -maxdepth 4 -type f | sort | head -300
-          WRAPPER="$(find extracted -type f -name gradlew -print -quit)"
-          if [ -z "$WRAPPER" ]; then
-            echo "::error::No Gradle wrapper (gradlew) found in UCTSalary_Android.zip"
+
+          PROJECT_DIR="$(find extracted -type f \\( -name 'settings.gradle' -o -name 'settings.gradle.kts' \\) -print -quit | xargs -r dirname)"
+          if [ -z "$PROJECT_DIR" ] || [ ! -d "$PROJECT_DIR" ]; then
+            echo "::error::Gradle project settings file not found in archive"
             exit 1
           fi
-          PROJECT_DIR="$(dirname "$WRAPPER")"
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
-          chmod +x "$WRAPPER"
-          echo "Gradle project root: $PROJECT_DIR"
-          echo "Gradle settings/build files:"
-          find "$PROJECT_DIR" -maxdepth 2 \( -name 'settings.gradle' -o -name 'settings.gradle.kts' -o -name 'build.gradle' -o -name 'build.gradle.kts' \) -print
+
+          WRAPPER_PROPS="$PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties"
+          if [ ! -f "$WRAPPER_PROPS" ]; then
+            echo "::error::gradle-wrapper.properties is missing"
+            exit 1
+          fi
+          DIST_URL="$(sed -n 's/^distributionUrl=//p' "$WRAPPER_PROPS" | sed 's/\\\\:/\:/g' | tail -1)"
+          GRADLE_VERSION="$(printf '%s' "$DIST_URL" | sed -nE 's#.*gradle-([0-9]+(\\.[0-9]+)*)(-all|-bin)?\\.zip#\\1#p')"
+          if [ -z "$GRADLE_VERSION" ]; then
+            echo "::error::Could not determine Gradle version from $WRAPPER_PROPS"
+            cat "$WRAPPER_PROPS"
+            exit 1
+          fi
+          echo "GRADLE_VERSION=$GRADLE_VERSION" >> "$GITHUB_ENV"
+
+          echo "Project root: $PROJECT_DIR"
+          echo "Wrapper distribution: $DIST_URL"
+          echo "Detected Gradle version: $GRADLE_VERSION"
+          echo "---- Root build.gradle.kts ----"
+          cat "$PROJECT_DIR/build.gradle.kts" 2>/dev/null || true
+          echo "---- App build.gradle.kts ----"
+          cat "$PROJECT_DIR/app/build.gradle.kts" 2>/dev/null || true
+          echo "---- Gradle wrapper properties ----"
+          cat "$WRAPPER_PROPS"
+
+      - name: Set up project Gradle version
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: ${{ env.GRADLE_VERSION }}
+
+      - name: Install Android platform and build tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
       - name: Build debug APK
         working-directory: ${{ env.PROJECT_DIR }}
         shell: bash
         run: |
           set -euo pipefail
-          ./gradlew --no-daemon --stacktrace assembleDebug
+          gradle --version
+          gradle --no-daemon --stacktrace assembleDebug
 
       - name: Collect APKs
-        id: collect
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p apk-output
-          find "$PROJECT_DIR" -type f -path '*/build/outputs/apk/*/*.apk' -exec cp {} apk-output/ \;
+          find "$PROJECT_DIR" -type f -path '*/build/outputs/apk/*/*.apk' -exec cp {} apk-output/ \\;
           if [ -z "$(find apk-output -maxdepth 1 -name '*.apk' -print -quit)" ]; then
             echo "::error::Gradle completed but no APK was found"
             exit 1
           fi
           ls -lh apk-output
 
-      - name: Upload debug APK
+      - name: Upload debug APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: UCTSalary-Android-debug-APK
