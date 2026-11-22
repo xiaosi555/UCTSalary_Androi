@@ -28,7 +28,13 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: platform-tools,platforms;android-35,build-tools;35.0.0
+          packages: platform-tools
+
+      - name: Install Android platform and build tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          yes | sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
       - name: Inspect and extract Android project
         shell: bash
