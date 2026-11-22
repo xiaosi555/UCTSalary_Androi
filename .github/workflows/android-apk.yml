@@ -33,7 +33,6 @@ jobs:
           packages: platform-tools
 
       - name: Extract project and detect build versions
-        id: project
         shell: bash
         run: |
           set -euo pipefail
@@ -41,11 +40,15 @@ jobs:
           mkdir -p extracted
           unzip -q UCTSalary_Android.zip -d extracted
 
-          PROJECT_DIR="$(find extracted -type f \\( -name 'settings.gradle' -o -name 'settings.gradle.kts' \\) -print -quit | xargs -r dirname)"
-          if [ -z "$PROJECT_DIR" ] || [ ! -d "$PROJECT_DIR" ]; then
+          SETTINGS_FILE="$(find extracted -type f -name 'settings.gradle.kts' -print -quit)"
+          if [ -z "$SETTINGS_FILE" ]; then
+            SETTINGS_FILE="$(find extracted -type f -name 'settings.gradle' -print -quit)"
+          fi
+          if [ -z "$SETTINGS_FILE" ]; then
             echo "::error::Gradle project settings file not found in archive"
             exit 1
           fi
+          PROJECT_DIR="$(dirname "$SETTINGS_FILE")"
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
 
           WRAPPER_PROPS="$PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties"
@@ -53,8 +56,8 @@ jobs:
             echo "::error::gradle-wrapper.properties is missing"
             exit 1
           fi
-          DIST_URL="$(sed -n 's/^distributionUrl=//p' "$WRAPPER_PROPS" | sed 's/\\\\:/\:/g' | tail -1)"
-          GRADLE_VERSION="$(printf '%s' "$DIST_URL" | sed -nE 's#.*gradle-([0-9]+(\\.[0-9]+)*)(-all|-bin)?\\.zip#\\1#p')"
+          DIST_URL="$(grep '^distributionUrl=' "$WRAPPER_PROPS" | cut -d= -f2- | sed 's/\\\\:/:/g')"
+          GRADLE_VERSION="$(printf '%s' "$DIST_URL" | grep -oE 'gradle-[0-9]+(\\.[0-9]+)*' | head -1 | sed 's/^gradle-//')"
           if [ -z "$GRADLE_VERSION" ]; then
             echo "::error::Could not determine Gradle version from $WRAPPER_PROPS"
             cat "$WRAPPER_PROPS"
@@ -96,7 +99,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p apk-output
-          find "$PROJECT_DIR" -type f -path '*/build/outputs/apk/*/*.apk' -exec cp {} apk-output/ \\;
+          find "$PROJECT_DIR" -type f -path '*/build/outputs/apk/*/*.apk' -exec cp {} apk-output/ \;
           if [ -z "$(find apk-output -maxdepth 1 -name '*.apk' -print -quit)" ]; then
             echo "::error::Gradle completed but no APK was found"
             exit 1
