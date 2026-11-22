@@ -79,7 +79,10 @@ jobs:
           cat "$WRAPPER_PROPS"
 
           HOME_SCREEN="$PROJECT_DIR/app/src/main/java/com/uct/salary/ui/screens/HomeScreen.kt"
-          if [ -f "$HOME_SCREEN" ] && grep -q 'matchParentSize' "$HOME_SCREEN" && ! grep -q '^import androidx.compose.foundation.layout.matchParentSize
+          if grep -q "matchParentSize" "$HOME_SCREEN" && ! grep -q "import androidx.compose.foundation.layout.matchParentSize" "$HOME_SCREEN"; then
+            sed -i "/^package /a import androidx.compose.foundation.layout.matchParentSize" "$HOME_SCREEN"
+            echo "Applied missing Compose matchParentSize import to HomeScreen.kt"
+          fi
       - name: Set up project Gradle version
         uses: gradle/actions/setup-gradle@v4
         with:
