@@ -108,13 +108,14 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p apk-output
-          find "$PROJECT_DIR" -type f -path '*/build/outputs/apk/*/*.apk' -exec cp {} apk-output/ \\;
-          if [ -z "$(find apk-output -maxdepth 1 -name '*.apk' -print -quit)" ]; then
+          APK_PATH="$(find "$PROJECT_DIR" -type f -path "*/build/outputs/apk/*/*.apk" -print -quit)"
+          if [ -z "$APK_PATH" ]; then
             echo "::error::Gradle completed but no APK was found"
+            find "$PROJECT_DIR" -type f -path "*/build/outputs/*" -print
             exit 1
           fi
+          cp "$APK_PATH" apk-output/
           ls -lh apk-output
-
       - name: Upload debug APK artifact
         uses: actions/upload-artifact@v4
         with:
