@@ -167,8 +167,7 @@ private fun SummaryBox(vm: AppViewModel, key: String, modifier: Modifier = Modif
             Text("合计", fontSize = 14.sp, color = Gray800, modifier = Modifier.weight(1f))
             Text(Fmt.money(total), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = primary())
         }
-    }
-}'''
+    }'''
 )
 
 replace_region(
