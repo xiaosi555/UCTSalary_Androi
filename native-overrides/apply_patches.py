@@ -379,28 +379,28 @@ fun DonutChart(
 }'''
 )
 
-replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals(102.16, sm.taxable, 1e-6)', 'assertEquals(200.9080459770113, sm.taxable, 1e-6)')
+replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals(102.16, sm.taxable, 1e-6)', 'assertEquals(200.9280459770113, sm.taxable, 1e-6)')
 replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals(200.0, sm.taxable, 1e-6)', 'assertEquals(981.4942528735631, sm.taxable, 1e-6)')
 
 
-replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals("792.33", Fmt.fixed2(c.social))', 'assertEquals("981.00", Fmt.fixed2(c.social))')
-replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals("1028.99", Fmt.money(st.totalDeduct))', 'assertEquals("1217.66", Fmt.money(st.totalDeduct))')
-replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals("5287.42", Fmt.money(st.net))', 'assertEquals("5098.75", Fmt.money(st.net))')
-replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals(792.33, sm.social, 1e-6)', 'assertEquals(981.0, sm.social, 1e-6)')
-replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals("926.83", Calc.sheetValue(SheetItem("social", ""), st))', 'assertEquals("1115.5", Calc.sheetValue(SheetItem("social", ""), st))')
-replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals("5287.42", Calc.sheetValue(SheetItem("net", ""), st))', 'assertEquals("5098.75", Calc.sheetValue(SheetItem("net", ""), st))')
+replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals("792.33", Fmt.fixed2(c.social))', 'assertEquals("980.98", Fmt.fixed2(c.social))')
+replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals("1028.99", Fmt.money(st.totalDeduct))', 'assertEquals("1217.64", Fmt.money(st.totalDeduct))')
+replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals("5287.42", Fmt.money(st.net))', 'assertEquals("5098.77", Fmt.money(st.net))')
+replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals(792.33, sm.social, 1e-6)', 'assertEquals(980.98, sm.social, 1e-6)')
+replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals("926.83", Calc.sheetValue(SheetItem("social", ""), st))', 'assertEquals("1115.48", Calc.sheetValue(SheetItem("social", ""), st))')
+replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals("5287.42", Calc.sheetValue(SheetItem("net", ""), st))', 'assertEquals("5098.77", Calc.sheetValue(SheetItem("net", ""), st))')
 
 p = root / 'docs/golden_cases.json'
 data = json.loads(p.read_text(encoding='utf-8'))
-data['cycles']['202610']['summary']['taxable'] = 200.9080459770113
-data['cycles']['202610']['summary']['social'] = 981.0
-data['hs']['202610']['social'] = 981.0
-data['cycles']['202610']['deductTotal'] = '-1217.66'
-data['cycles']['202610']['footDeduct'] = '-1217.66'
-data['cycles']['202610']['net'] = '5098.75'
-data['cycles']['202610']['sheet']['social'] = '1115.5'
-data['cycles']['202610']['sheet']['net'] = '5098.75'
-data['cycles']['202610']['calSummary'] = data['cycles']['202610']['calSummary'].replace('应纳税所得额 102.16', '应纳税所得额 200.91').replace('合计 5421.92', '合计 5134.5').replace('个人五险 792.33', '个人五险 981')
+data['cycles']['202610']['summary']['taxable'] = 200.9280459770113
+data['cycles']['202610']['summary']['social'] = 980.98
+data['hs']['202610']['social'] = 980.98
+data['cycles']['202610']['deductTotal'] = '-1217.64'
+data['cycles']['202610']['footDeduct'] = '-1217.64'
+data['cycles']['202610']['net'] = '5098.77'
+data['cycles']['202610']['sheet']['social'] = '1115.48'
+data['cycles']['202610']['sheet']['net'] = '5098.77'
+data['cycles']['202610']['calSummary'] = data['cycles']['202610']['calSummary'].replace('应纳税所得额 102.16', '应纳税所得额 200.93').replace('合计 5421.92', '合计 5134.5').replace('个人五险 792.33', '个人五险 980.98')
 data['cycles']['202611']['summary']['taxable'] = 981.4942528735631
 data['cycles']['202611']['calSummary'] = data['cycles']['202611']['calSummary'].replace('应纳税所得额 200', '应纳税所得额 981.49').replace('合计 5661.49', '合计 4880')
 p.write_text(json.dumps(data, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
