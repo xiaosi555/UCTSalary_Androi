@@ -84,6 +84,20 @@ jobs:
           echo "---- HomeScreen.kt first 50 lines after patch ----"
           nl -ba "$HOME_SCREEN" | sed -n "1,50p"
 
+      - name: Prepare native source review bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p source-review
+          cd "$PROJECT_DIR"
+          find . -type f \\( -name '*.kt' -o -name '*.java' -o -name '*.xml' -o -name '*.gradle' -o -name '*.gradle.kts' -o -name '*.properties' -o -name '*.pro' -o -name '*.json' \\) -print | sort > "$GITHUB_WORKSPACE/source-review/FILE_INDEX.txt"
+          while IFS= read -r file; do
+            mkdir -p "$GITHUB_WORKSPACE/source-review/$(dirname "$file")"
+            cp "$file" "$GITHUB_WORKSPACE/source-review/$file"
+          done < "$GITHUB_WORKSPACE/source-review/FILE_INDEX.txt"
+          cd "$GITHUB_WORKSPACE"
+          zip -qr native-source-review.zip source-review
+
       - name: Set up project Gradle version
         uses: gradle/actions/setup-gradle@v4
         with:
