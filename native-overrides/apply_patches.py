@@ -49,6 +49,23 @@ replace_once(
         )'''
 )
 
+
+replace_once(
+    'app/src/main/java/com/uct/salary/core/Calc.kt',
+    """    fun ratesAt(history: List<SettingsVersion>, key: String): Rates {
+        val l = sorted(history).filter { it.from <= key }
+        for (i in l.indices.reversed()) {
+            val r = l[i].deduction.rates
+            if (r != null) return r
+        }
+        return Rates()
+    }""",
+    """    fun ratesAt(history: List<SettingsVersion>, key: String): Rates {
+        // 原版 HTML 的五险比例来自当前设置项，历史快照只保存缴费基数。
+        return sorted(history).asReversed().firstNotNullOfOrNull { it.deduction.rates } ?: Rates()
+    }"""
+)
+
 replace_once(
     'app/src/main/java/com/uct/salary/ui/screens/CalendarScreen.kt',
     '''    var modifier = Modifier.fillMaxWidth().height(56.dp).clip(shape)
@@ -150,7 +167,8 @@ private fun SummaryBox(vm: AppViewModel, key: String, modifier: Modifier = Modif
             Text("合计", fontSize = 14.sp, color = Gray800, modifier = Modifier.weight(1f))
             Text(Fmt.money(total), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = primary())
         }
-    '''
+    }
+}'''
 )
 
 replace_region(
@@ -245,6 +263,34 @@ private fun HomeEntry(icon: androidx.compose.ui.graphics.vector.ImageVector, lab
 replace_once('app/src/main/java/com/uct/salary/ui/screens/HomeScreen.kt', 'import androidx.compose.ui.graphics.Brush\n', '')
 replace_once('app/src/main/java/com/uct/salary/ui/screens/HomeScreen.kt', 'import com.uct.salary.ui.theme.Gray600\n', 'import com.uct.salary.ui.theme.Gray600\nimport com.uct.salary.ui.theme.Gray700\n')
 
+
+replace_once(
+    'app/src/main/java/com/uct/salary/ui/AppViewModel.kt',
+    'import com.uct.salary.model.QuickRecord\\n',
+    'import com.uct.salary.model.QuickRecord\\nimport com.uct.salary.model.Rates\\n'
+)
+replace_once(
+    'app/src/main/java/com/uct/salary/ui/AppViewModel.kt',
+    '    fun saveDeduction(cfg: DeductionCfg) = mutateVersion(cfgKey) { it.copy(deduction = cfg) }',
+    """    fun saveDeduction(cfg: DeductionCfg) {
+        val list = Calc.upsertVersion(data.history, cfgKey) { it.copy(deduction = cfg) }
+        val currentRates = cfg.rates ?: Calc.ratesAt(data.history, cfgKey)
+        val synced = list.map { it.copy(deduction = it.deduction.copy(rates = currentRates)) }
+        data = data.copy(history = synced)
+        repo.saveHistory(currentUserId, synced)
+    }"""
+)
+replace_once(
+    'app/src/main/java/com/uct/salary/ui/screens/SettingsScreens.kt',
+    'Text("正值输入，计算时自动取负；收支汇总的“应纳税所得额”取此值", fontSize = 11.sp, color = Gray400, modifier = Modifier.padding(top = 6.dp))',
+    'Text("正值输入，计算时自动取负", fontSize = 11.sp, color = Gray400, modifier = Modifier.padding(top = 6.dp))'
+)
+replace_once(
+    'app/src/main/java/com/uct/salary/ui/screens/CalendarScreen.kt',
+    'if (isRest) "休" else Fmt.money(pay.total), fontSize = 10.sp, fontWeight = FontWeight.Medium, color = amountColor,',
+    'if (isRest) "休" else Fmt.money(pay.total), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = amountColor,'
+)
+
 replace_once('app/src/main/java/com/uct/salary/ui/components/Charts.kt', 'import androidx.compose.ui.graphics.drawscope.Stroke\n', 'import androidx.compose.ui.graphics.drawscope.Stroke\nimport androidx.compose.ui.graphics.nativeCanvas\nimport androidx.compose.ui.graphics.toArgb\n')
 replace_once('app/src/main/java/com/uct/salary/ui/components/Charts.kt', 'import kotlin.math.abs\n', 'import android.graphics.Paint\nimport android.graphics.Typeface\nimport kotlin.math.abs\nimport kotlin.math.cos\nimport kotlin.math.sin\n')
 replace_region(
@@ -334,13 +380,20 @@ fun DonutChart(
 }'''
 )
 
-replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals(102.16, sm.taxable, 1e-6)', 'assertEquals(389.5780459770113, sm.taxable, 1e-6)')
+replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals(200.9080459770113, sm.taxable, 1e-6)', 'assertEquals(200.9080459770113, sm.taxable, 1e-6)')
 replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals(200.0, sm.taxable, 1e-6)', 'assertEquals(981.4942528735631, sm.taxable, 1e-6)')
+
+
+replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals("792.33", Fmt.fixed2(c.social))', 'assertEquals("981.00", Fmt.fixed2(c.social))')
+replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals("1028.99", Fmt.money(st.totalDeduct))', 'assertEquals("1217.66", Fmt.money(st.totalDeduct))')
+replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals("5287.42", Fmt.money(st.net))', 'assertEquals("5098.75", Fmt.money(st.net))')
+replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals(792.33, sm.social, 1e-6)', 'assertEquals(981.0, sm.social, 1e-6)')
+replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals("926.83", Calc.sheetValue(SheetItem("social", ""), st))', 'assertEquals("1115.5", Calc.sheetValue(SheetItem("social", ""), st))')
 
 p = root / 'docs/golden_cases.json'
 data = json.loads(p.read_text(encoding='utf-8'))
-data['cycles']['202610']['summary']['taxable'] = 389.5780459770113
-data['cycles']['202610']['calSummary'] = data['cycles']['202610']['calSummary'].replace('应纳税所得额 102.16', '应纳税所得额 389.58').replace('合计 5421.92', '合计 5134.5')
+data['cycles']['202610']['summary']['taxable'] = 200.9080459770113
+data['cycles']['202610']['calSummary'] = data['cycles']['202610']['calSummary'].replace('应纳税所得额 102.16', '应纳税所得额 200.91').replace('合计 5134.5', '合计 5134.5')
 data['cycles']['202611']['summary']['taxable'] = 981.4942528735631
 data['cycles']['202611']['calSummary'] = data['cycles']['202611']['calSummary'].replace('应纳税所得额 200', '应纳税所得额 981.49').replace('合计 5661.49', '合计 4880')
 p.write_text(json.dumps(data, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
