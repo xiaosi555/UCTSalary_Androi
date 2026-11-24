@@ -7,6 +7,7 @@ on:
       - 'UCTSalary_Android.zip'
       - '.github/workflows/android-apk.yml'
       - 'README.md'
+      - 'native-overrides/**'
   workflow_dispatch:
 
 permissions:
@@ -79,6 +80,7 @@ jobs:
             sed -i "/^import androidx.compose.foundation.layout.matchParentSize$/d" "$HOME_SCREEN"
             echo "Removed invalid package-level matchParentSize import; BoxScope supplies this member extension"
           fi
+          python3 "$GITHUB_WORKSPACE/native-overrides/apply_patches.py" "$PROJECT_DIR"
           echo "---- HomeScreen.kt imports after patch ----"
           sed -n "1,50p" "$HOME_SCREEN"
           echo "---- HomeScreen.kt first 50 lines after patch ----"
@@ -108,6 +110,13 @@ jobs:
         run: |
           set -euo pipefail
           sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Run native calculation tests
+        working-directory: ${{ env.PROJECT_DIR }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gradle --no-daemon --stacktrace testDebugUnitTest
 
       - name: Build debug APK
         working-directory: ${{ env.PROJECT_DIR }}
@@ -143,7 +152,7 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add UCTSalary_Android.zip
-            git commit -m "Fix Compose import in Android source archive [skip ci]"
+            git commit -m "Apply HTML parity updates to Android source archive [skip ci]"
             git push origin HEAD:main
             echo "Patched Android source archive committed to main"
           else
