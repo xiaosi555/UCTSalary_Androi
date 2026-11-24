@@ -7,6 +7,9 @@ root = Path(sys.argv[1])
 def replace_once(path: str, old: str, new: str):
     p = root / path
     s = p.read_text(encoding='utf-8')
+    if new in s:
+        print(f'ALREADY PATCHED {path}')
+        return
     if old not in s:
         raise SystemExit(f'PATCH FAILED: expected block not found in {path}')
     p.write_text(s.replace(old, new, 1), encoding='utf-8')
@@ -215,30 +218,32 @@ fun HomeScreen(vm: AppViewModel) {
             }
         }
         Column(Modifier.padding(horizontal = 16.dp).offset(y = (-96).dp).fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp)).background(White).padding(20.dp)) {
+            .shadow(1.dp, RoundedCornerShape(12.dp)).clip(RoundedCornerShape(12.dp)).background(White).padding(20.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 HomeEntry(AppIcons.Calendar, "日历", Modifier.weight(1f)) { vm.openCalendar() }
                 HomeEntry(AppIcons.BarChart, "统计", Modifier.weight(1f)) { vm.openStats(0) }
                 HomeEntry(AppIcons.Sign, "签到", Modifier.weight(1f)) { /* 原版此项仅展示 */ }
             }
             Spacer(Modifier.height(20.dp))
-            Box(Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(8.dp)).background(pri).clickable { vm.openNewRecordToday() }, contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxWidth().height(48.dp).shadow(1.dp, RoundedCornerShape(8.dp)).clip(RoundedCornerShape(8.dp)).background(pri).clickable { vm.openNewRecordToday() }, contentAlignment = Alignment.Center) {
                 Text("记加班", color = onPrimary(), fontSize = 16.sp, fontWeight = FontWeight.Medium)
             }
             Spacer(Modifier.height(16.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Row(Modifier.weight(1f).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.fillMaxWidth().height(32.dp)) {
+                Row(Modifier.fillMaxSize().horizontalScroll(rememberScrollState()).padding(end = 64.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     when {
                         !vm.data.quick.show -> Text("快捷记录展示已关闭", fontSize = 12.sp, color = Gray400)
                         vm.data.quick.records.isEmpty() -> Text("暂无快捷记录", fontSize = 12.sp, color = Gray400)
                         else -> vm.data.quick.records.forEach { q -> QuickTag(q) { vm.quickRecord(q) } }
                     }
                 }
-                Spacer(Modifier.width(8.dp))
-                Row(Modifier.clip(RoundedCornerShape(6.dp)).dashedBorder(Gray400).clickable { vm.push(Route.QuickSettings) }.padding(horizontal = 8.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(AppIcons.Bolt, null, tint = Gray600, modifier = Modifier.size(14.dp))
-                    Spacer(Modifier.width(2.dp))
-                    Text("设置", fontSize = 12.sp, color = Gray600)
+                Row(Modifier.align(Alignment.CenterEnd).background(Brush.horizontalGradient(listOf(Color.Transparent, White, White))).padding(start = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Row(Modifier.clip(RoundedCornerShape(6.dp)).background(White).shadow(1.dp, RoundedCornerShape(6.dp)).dashedBorder(pri)
+                        .clickable { vm.push(Route.QuickSettings) }.padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(AppIcons.Bolt, null, tint = pri, modifier = Modifier.size(14.dp))
+                        Spacer(Modifier.width(2.dp))
+                        Text("设置", fontSize = 12.sp, color = pri)
+                    }
                 }
             }
         }
@@ -259,7 +264,9 @@ private fun HomeEntry(icon: androidx.compose.ui.graphics.vector.ImageVector, lab
     }
 }'''
 )
-replace_once('app/src/main/java/com/uct/salary/ui/screens/HomeScreen.kt', 'import androidx.compose.ui.graphics.Brush\n', '')
+replace_once('app/src/main/java/com/uct/salary/ui/screens/HomeScreen.kt', 'import androidx.compose.ui.graphics.Color\n', 'import androidx.compose.ui.graphics.Color\nimport androidx.compose.ui.graphics.Brush\n')
+replace_once('app/src/main/java/com/uct/salary/ui/screens/HomeScreen.kt', 'import androidx.compose.ui.draw.clip\n', 'import androidx.compose.ui.draw.clip\nimport androidx.compose.ui.draw.shadow\n')
+replace_once('app/src/main/java/com/uct/salary/ui/screens/HomeScreen.kt', 'Modifier.clip(RoundedCornerShape(6.dp)).background(Gray50).border(1.dp, Gray200, RoundedCornerShape(6.dp))', 'Modifier.clip(RoundedCornerShape(6.dp)).background(White).border(1.dp, Gray200, RoundedCornerShape(6.dp))')
 replace_once('app/src/main/java/com/uct/salary/ui/screens/HomeScreen.kt', 'import com.uct.salary.ui.theme.Gray600\n', 'import com.uct.salary.ui.theme.Gray600\nimport com.uct.salary.ui.theme.Gray700\n')
 
 
