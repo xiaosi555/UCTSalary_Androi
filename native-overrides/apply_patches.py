@@ -266,8 +266,8 @@ replace_once('app/src/main/java/com/uct/salary/ui/screens/HomeScreen.kt', 'impor
 
 replace_once(
     'app/src/main/java/com/uct/salary/ui/AppViewModel.kt',
-    'import com.uct.salary.model.QuickRecord\\n',
-    'import com.uct.salary.model.QuickRecord\\nimport com.uct.salary.model.Rates\\n'
+    'import com.uct.salary.model.QuickRecord\n',
+    'import com.uct.salary.model.QuickRecord\nimport com.uct.salary.model.Rates\n'
 )
 replace_once(
     'app/src/main/java/com/uct/salary/ui/AppViewModel.kt',
