@@ -157,3 +157,11 @@ jobs:
           path: apk-output/*.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Upload native source review artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: UCTSalary-native-source-review
+          path: native-source-review.zip
+          if-no-files-found: error
+          retention-days: 7
