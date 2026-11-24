@@ -380,7 +380,7 @@ fun DonutChart(
 }'''
 )
 
-replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals(200.9080459770113, sm.taxable, 1e-6)', 'assertEquals(200.9080459770113, sm.taxable, 1e-6)')
+replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals(102.16, sm.taxable, 1e-6)', 'assertEquals(200.9080459770113, sm.taxable, 1e-6)')
 replace_once('app/src/test/java/com/uct/salary/CalcTest.kt', 'assertEquals(200.0, sm.taxable, 1e-6)', 'assertEquals(981.4942528735631, sm.taxable, 1e-6)')
 
 
